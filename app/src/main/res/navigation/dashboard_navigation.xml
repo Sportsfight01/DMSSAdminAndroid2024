@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation3"
+    app:startDestination="@+id/fragment_dashboard">
+    <fragment
+        android:id="@+id/fragment_dashboard"
+        android:name="com.dmss.dmssadminmaintanance.dashboard.DashboardFragment"
+        android:label="DashboardFragment"
+        tools:layout="@layout/fragment_dashboard">
+        <action
+            android:id="@+id/action_mobile_navigation_to_addNoteFragment"
+            app:destination="@id/task_list_fragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/task_list_fragment"
+        android:name="com.dmss.dmssadminmaintanance.pantry.PantryTasksListFragment"
+        android:label="Pantry Fragment"
+        tools:layout="@layout/fragment_pantry_tasks_list" >
+        <action
+            android:id="@+id/action_addNoteFragment_to_home_fragment1"
+            app:destination="@id/fragment_dashboard" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragment_pending_task_list"
+        android:name="com.dmss.dmssadminmaintanance.pantry.PendingTaskListFragment"
+        android:label="Pantry Fragment"
+        tools:layout="@layout/fragment_pending_task_list" >
+        <action
+            android:id="@+id/action_addNoteFragment_to_home_fragment1"
+            app:destination="@id/fragment_dashboard" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragment_completed_task_list"
+        android:name="com.dmss.dmssadminmaintanance.pantry.CompletedTaskListFragment"
+        android:label="Pantry Fragment"
+        tools:layout="@layout/fragment_pending_task_list" >
+        <action
+            android:id="@+id/action_addNoteFragment_to_home_fragment1"
+            app:destination="@id/fragment_dashboard" />
+    </fragment>
+    <fragment
+        android:id="@+id/pantryHomeFragment"
+        android:name="com.dmss.dmssadminmaintanance.pantry.PantryHomeFragment"
+        android:label="Pantry Fragment"
+        tools:layout="@layout/fragment_pantry_home" >
+        <action
+            android:id="@+id/action_addNoteFragment_to_home_fragment1"
+            app:destination="@id/fragment_dashboard" />
+    </fragment>
+
+
+
+    <fragment
+        android:id="@+id/restRoomHomeFragment"
+        android:name="com.dmss.dmssadminmaintanance.pantry.RestRoomHomeFragment"
+        android:label="Pantry Fragment"
+        tools:layout="@layout/fragment_pantry_home" >
+        <action
+            android:id="@+id/action_addNoteFragment_to_home_fragment1"
+            app:destination="@id/fragment_dashboard" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/rest_room_task_list_fragment"
+        android:name="com.dmss.dmssadminmaintanance.restroom.RestRooTasksFragment"
+        android:label="fragment_pantry_tasks_list"
+        tools:layout="@layout/fragment_pantry_tasks_list" >
+        <action
+            android:id="@+id/action_addNoteFragment_to_home_fragment1"
+            app:destination="@id/fragment_dashboard" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragment_rest_room_pending_task_list"
+        android:name="com.dmss.dmssadminmaintanance.pantry.PendingTaskListFragment"
+        android:label="fragment_pending_task_list"
+        tools:layout="@layout/fragment_pending_task_list" >
+        <action
+            android:id="@+id/action_addNoteFragment_to_home_fragment1"
+            app:destination="@id/fragment_dashboard" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragment_rest_room_completed_task_list"
+        android:name="com.dmss.dmssadminmaintanance.restroom.RestRoomCompletedTasksFragment"
+        android:label="fragment_completed_task_list"
+        tools:layout="@layout/fragment_completed_task_list" >
+        <action
+            android:id="@+id/action_addNoteFragment_to_home_fragment1"
+            app:destination="@id/fragment_dashboard" />
+    </fragment>
+    <fragment
+        android:id="@+id/download_xls_fragment"
+        android:name="com.dmss.dmssadminmaintanance.sidemenu.DownloadExcelsFragment"
+        android:label="DownloadExcelsFragment"
+        tools:layout="@layout/fragment_download_excels" >
+        <action
+            android:id="@+id/action_addNoteFragment_to_home_fragment1"
+            app:destination="@id/fragment_dashboard" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/assign_person_fragment"
+        android:name="com.dmss.dmssadminmaintanance.sidemenu.AssigningToPersonFragment"
+        android:label="DownloadExcelsFragment"
+        tools:layout="@layout/fragment_assigning_to_person" >
+        <action
+            android:id="@+id/action_addNoteFragment_to_home_fragment1"
+            app:destination="@id/fragment_dashboard" />
+    </fragment>
+</navigation>

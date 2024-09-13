@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/type7"
+        android:title="7:00"
+        />
+
+    <item
+        android:id="@+id/type8"
+        android:title="8:00"
+        />
+    <item
+        android:id="@+id/type9"
+        android:title="9:00"
+        />
+
+    <item
+        android:id="@+id/type10"
+        android:title="10:00"
+        />
+    <item
+        android:id="@+id/type11"
+        android:title="11:00"
+        />
+
+    <item
+        android:id="@+id/type12"
+        android:title="12:00"
+        />
+    <item
+        android:id="@+id/type13"
+        android:title="13:00"
+        />
+
+    <item
+        android:id="@+id/type14"
+        android:title="14:00"
+        />
+    <item
+        android:id="@+id/type15"
+        android:title="15:00"
+        />
+
+    <item
+        android:id="@+id/type16"
+        android:title="16:00"
+        />
+    <item
+        android:id="@+id/type17"
+        android:title="17:00"
+        />
+
+    <item
+        android:id="@+id/type18"
+        android:title="18:00"
+        />
+    <item
+        android:id="@+id/type19"
+        android:title="19:00"
+        />
+
+    <item
+        android:id="@+id/type2"
+        android:title="20:00"
+        />
+
+</menu>

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <androidx.appcompat.widget.AppCompatButton
+        android:layout_width="@dimen/_55sdp"
+        android:layout_height="25dp"
+        android:id="@+id/submit"
+        android:gravity="center"
+        android:background="@drawable/green_button_corner"
+        android:textColor="@color/white"
+        android:text="@string/submit"
+        android:layout_marginEnd="@dimen/_5sdp"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="@dimen/_12sdp"
+        app:layout_constraintTop_toTopOf="parent" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:id="@+id/ci_calender"
+            android:gravity="center"
+            android:background="@drawable/view_task"
+            android:textColor="@color/white"
+            android:text="@string/submit"
+            android:textSize="10sp"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="12-08-2024"
+            android:textColor="@color/black"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:id="@+id/selected_date"
+            android:textSize="16sp" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:visibility="gone"
+            android:id="@+id/ll_date"
+            android:orientation="horizontal">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/ci_timer"
+                android:layout_width="@dimen/_25sdp"
+                android:layout_height="@dimen/_25sdp"
+                android:layout_gravity="center"
+                android:layout_marginStart="15dp"
+                android:background="@drawable/timer_icon"
+                android:gravity="center"
+                android:text="@string/submit"
+                android:textColor="@color/white"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/tv_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:visibility="gone"
+                android:textColorHint="@color/black"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:textSize="@dimen/_12sdp"
+                android:inputType="none"
+                android:text="Time"
+                />
+            <TextView
+                android:id="@+id/select_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:gravity="center"
+                android:paddingLeft="2dp"
+                android:textColorHint="@color/black"
+                android:layout_marginStart="@dimen/_2sdp"
+                android:drawableRight="@drawable/down_arrow"
+                android:textSize="@dimen/_12sdp"
+                android:inputType="none"
+                android:text="0"
+                />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="5dp"
+        android:layout_marginStart="@dimen/_5sdp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="All"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+
+        <CheckedTextView
+            android:id="@+id/ct_select_all"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableLeft="?android:attr/listChoiceIndicatorMultiple"
+            android:drawableEnd="@null"
+            android:drawableRight="@null"
+            android:drawableTint="@color/blue"
+            android:padding="5dp"
+            android:scaleX="1"
+            android:scaleY="1"
+            android:layout_marginRight="@dimen/_7sdp"
+            android:checked="false"
+            android:clickable="true"
+            android:focusable="true"
+            android:textAppearance="?android:textAppearanceLarge"
+            android:textColor="@color/black" />
+    </LinearLayout>v
+</androidx.constraintlayout.widget.ConstraintLayout>

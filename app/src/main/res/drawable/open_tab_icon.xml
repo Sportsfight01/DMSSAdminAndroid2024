@@ -1,0 +1,4 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/view_task" android:state_selected="true"/>
+    <item android:drawable="@drawable/view_task_black"/> <!-- default -->
+</selector>
