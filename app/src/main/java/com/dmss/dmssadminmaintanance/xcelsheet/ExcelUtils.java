@@ -5,6 +5,7 @@ import android.os.Environment;
 import android.util.Log;
 
 
+import com.dmss.dmssadminmaintanance.db.FemaleRestRoomTasks;
 import com.dmss.dmssadminmaintanance.db.PantryTasks;
 import com.dmss.dmssadminmaintanance.db.RestRoomTasks;
 
@@ -37,6 +38,8 @@ public class ExcelUtils {
     public static final String TAG = "ExcelUtil";
     private static Cell cell;
     private static Sheet sheet;
+    private static Sheet sheet1;
+
     private static Workbook workbook;
     private static CellStyle headerCellStyle;
     private static CellStyle CellsCellStyle;
@@ -68,7 +71,8 @@ public class ExcelUtils {
      * @param dataList - Contains the actual data to be displayed in excel
      */
     public static boolean exportPantryDataIntoWorkbook(Context context, String fileName,String selectedDate,
-                                                 List<PantryTasks> dataList) {
+                                                       Map<String,List<PantryTasks>> dataList,ArrayList<String> columns,
+                                                       ArrayList<String> timings) {
         boolean isWorkbookWrittenIntoStorage;
 
         // Check if available and not read only
@@ -89,15 +93,18 @@ public class ExcelUtils {
         sheet.setColumnWidth(0, (15 * 400));
         sheet.setColumnWidth(1, (15 * 400));
 
-        setPantryHeaderRow(pantry,name,created_date);
+        /*setPantryHeaderRow(pantry,name,created_date);
         fillPantryDataIntoExcel(dataList);
+        isWorkbookWrittenIntoStorage = storeExcelInStorage(context, fileName);*/
+        setRestRoomHeader(columns,timings,sheet);
+        fillPantryDataIntoExcel(dataList,timings,columns);
         isWorkbookWrittenIntoStorage = storeExcelInStorage(context, fileName);
 
         return isWorkbookWrittenIntoStorage;
     }
-    public static boolean exportRestRoomDataIntoWorkbook(Context context, String fileName,String selectedDate,
-                                                       Map<String,List<RestRoomTasks>> dataList,ArrayList<String> columns,
-                                                      ArrayList<String> timings) {
+    public static boolean exportRestRoomDataIntoWorkbook(Context context, String fileName, String selectedDate,
+                                                         Map<String,List<RestRoomTasks>> dataList, Map<String,List<FemaleRestRoomTasks>> femaledataList, ArrayList<String> columns,
+                                                         ArrayList<String> timings) {
         boolean isWorkbookWrittenIntoStorage;
 
         // Check if available and not read only
@@ -114,12 +121,20 @@ public class ExcelUtils {
         setHeaderAssignedCellStyle();
 
         // Creating a New Sheet and Setting width for each column
-        sheet = workbook.createSheet(selectedDate);
+        sheet = workbook.createSheet("Male");
         sheet.setColumnWidth(0, (15 * 400));
         sheet.setColumnWidth(1, (15 * 400));
 
-        setRestRoomHeader(columns,timings);
-        fillRestRoomDataIntoExcel(dataList,timings,columns);
+        sheet1 = workbook.createSheet("Female");
+        sheet1.setColumnWidth(0, (15 * 400));
+        sheet1.setColumnWidth(1, (15 * 400));
+
+        setRestRoomHeader(columns,timings,sheet);
+        setRestRoomHeader(columns,timings,sheet1);
+
+        fillRestRoomDataIntoExcel(dataList,timings,columns,sheet);
+        fillFemaleRestRoomDataIntoExcel(femaledataList,timings,columns,sheet1);
+
         isWorkbookWrittenIntoStorage = storeExcelInStorage(context, fileName);
 
         return isWorkbookWrittenIntoStorage;
@@ -168,7 +183,7 @@ public class ExcelUtils {
     /**
      * Setup Header Row
      */
-    private static void setRestRoomHeader(ArrayList<String> columsList,ArrayList<String> timingsList){
+    private static void setRestRoomHeader(ArrayList<String> columsList,ArrayList<String> timingsList,Sheet sheet){
       /*      Row headerRow = sheet.createRow(0);
             Row headerRow1 = sheet.createRow(1);
             Row headerRow2 = sheet.createRow(2);
@@ -242,7 +257,7 @@ public class ExcelUtils {
 
         }
     }
-    private static void fillRestRoomDataIntoExcel(Map<String,List<RestRoomTasks>> dataList,ArrayList<String> timingsList,ArrayList<String> columns) {
+    private static void fillRestRoomDataIntoExcel(Map<String,List<RestRoomTasks>> dataList,ArrayList<String> timingsList,ArrayList<String> columns,Sheet sheet) {
 
         for ( int i=0;i<timingsList.size();i++ ) {
             System.out.println( timingsList.get(i) );
@@ -258,7 +273,7 @@ public class ExcelUtils {
             for ( String key : dataList.keySet() ) {
 
                 if(key.equalsIgnoreCase(timingsList.get(i))) {
-                    cell.setCellValue(dataList.get(key).get(0).isAssignedTo());
+                    cell.setCellValue(dataList.get(key).get(0).getAssignedTo());
                     cell.setCellStyle(CellsCellStyle);
                     List<RestRoomTasks> listData = dataList.get(key);
                     insertData(listData, rowData1);
@@ -269,7 +284,95 @@ public class ExcelUtils {
         }
 
     }
+    private static void fillFemaleRestRoomDataIntoExcel(Map<String,List<FemaleRestRoomTasks>> dataList,ArrayList<String> timingsList,ArrayList<String> columns,Sheet sheet) {
+
+        for ( int i=0;i<timingsList.size();i++ ) {
+            System.out.println( timingsList.get(i) );
+            Row rowData1 = sheet.createRow(i+1);
+
+            cell = rowData1.createCell(0);
+            cell.setCellValue(timingsList.get(i));
+            cell.setCellStyle(CellsCellStyle);
+
+            cell = rowData1.createCell(columns.size()+1);
+
+
+            for ( String key : dataList.keySet() ) {
+
+                if(key.equalsIgnoreCase(timingsList.get(i))) {
+                    cell.setCellValue(dataList.get(key).get(0).getAssignedTo());
+                    cell.setCellStyle(CellsCellStyle);
+                    List<FemaleRestRoomTasks> listData = dataList.get(key);
+                    insertData1(listData, rowData1);
+                }
+            }
+
+
+        }
+
+    }
+    private static void fillPantryDataIntoExcel(Map<String,List<PantryTasks>> dataList,ArrayList<String> timingsList,ArrayList<String> columns) {
+
+        for ( int i=0;i<timingsList.size();i++ ) {
+            System.out.println( timingsList.get(i) );
+            Row rowData1 = sheet.createRow(i+1);
+
+            cell = rowData1.createCell(0);
+            cell.setCellValue(timingsList.get(i));
+            cell.setCellStyle(CellsCellStyle);
+
+            cell = rowData1.createCell(columns.size()+1);
+
+
+            for ( String key : dataList.keySet() ) {
+
+                if(key.equalsIgnoreCase(timingsList.get(i))) {
+                    cell.setCellValue(dataList.get(key).get(0).getAssignedTo());
+                    cell.setCellStyle(CellsCellStyle);
+                    List<PantryTasks> listData = dataList.get(key);
+                    insertPantryTasksData(listData, rowData1);
+                }
+            }
+
+
+        }
+
+    }
     private static void insertData(List<RestRoomTasks> listData,Row rowData){
+        if (listData!=null && listData.size()>0){
+            System.out.println("sevenList:: "+listData);
+            for (int j = 0; j < listData.size(); j++) {
+                cell = rowData.createCell(j + 1);
+                if(listData.get(j).isCompleted()==true) {
+                    cell.setCellValue("Done");
+                }else{
+                    cell.setCellValue(" ");
+
+                }
+
+                cell.setCellStyle(CellsCellStyle);
+
+            }
+        }
+    }
+    private static void insertData1(List<FemaleRestRoomTasks> listData,Row rowData){
+        if (listData!=null && listData.size()>0){
+            System.out.println("sevenList:: "+listData);
+            for (int j = 0; j < listData.size(); j++) {
+                cell = rowData.createCell(j + 1);
+                if(listData.get(j).isCompleted()==true) {
+                    cell.setCellValue("Done");
+                }else{
+                    cell.setCellValue(" ");
+
+                }
+
+                cell.setCellStyle(CellsCellStyle);
+
+            }
+        }
+    }
+    private static void insertPantryTasksData(List<PantryTasks> listData,Row rowData){
         if (listData!=null && listData.size()>0){
             System.out.println("sevenList:: "+listData);
             for (int j = 0; j < listData.size(); j++) {
@@ -408,7 +511,7 @@ public class ExcelUtils {
                         isCompleted = true;
                     }
 
-                    importedExcelData.add(new PantryTasks(rowDataList.get(0),rowDataList.get(1), isAssigned,isCompleted,1));
+//                    importedExcelData.add(new PantryTasks(rowDataList.get(0),rowDataList.get(1), isAssigned,isCompleted,1));
                 }
 
             }

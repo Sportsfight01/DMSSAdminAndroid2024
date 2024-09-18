@@ -112,8 +112,9 @@
                 <ImageView
                     android:layout_width="60dp"
                     android:layout_height="60dp"
-                    android:src="@drawable/view_task"
-                    android:layout_gravity="center"/>
+                    android:src="@drawable/pantry"
+                    android:layout_gravity="center"
+                    app:tint="@color/blue" />
                 <androidx.appcompat.widget.AppCompatTextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -146,8 +147,9 @@
                 <ImageView
                     android:layout_width="60dp"
                     android:layout_height="60dp"
-                    android:src="@drawable/update_task"
-                    android:layout_gravity="center"/>
+                    android:src="@drawable/toilet"
+                    android:layout_gravity="center"
+                    app:tint="@color/blue" />
                 <androidx.appcompat.widget.AppCompatTextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

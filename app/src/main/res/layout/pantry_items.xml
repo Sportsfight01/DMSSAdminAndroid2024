@@ -18,6 +18,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Open"
+            android:visibility="gone"
             android:id="@+id/tv_status"
             android:layout_below="@+id/icon"
             android:layout_marginTop="2dp"

@@ -14,6 +14,8 @@ import com.dmss.dmssadminmaintanance.BaseFragment
 import com.dmss.dmssadminmaintanance.R
 import com.dmss.dmssadminmaintanance.databinding.FragmentDownloadExcelsBinding
 import com.dmss.dmssadminmaintanance.databinding.LayoutDailogListViewBinding
+import com.dmss.dmssadminmaintanance.db.FemaleRestRoomTasks
+import com.dmss.dmssadminmaintanance.db.RestRoomTasks
 import com.dmss.dmssadminmaintanance.model.Utils
 import com.dmss.dmssadminmaintanance.pantry.adapter.CommanAdapter
 import com.dmss.dmssadminmaintanance.xcelsheet.Constants
@@ -32,9 +34,10 @@ class DownloadExcelsFragment : BaseFragment() {
     private lateinit var binding : FragmentDownloadExcelsBinding
     var tasksList = ArrayList<String>()
     var listOfRestRoomColumns = ArrayList<String>()
-    var listOfRestRoomTimingsColumns = ArrayList<String>()
-
-    private lateinit var viewModel: MaintainanceViewModel
+    var listOfTimingsColumns = ArrayList<String>()
+    var listOfPantryColumns = ArrayList<String>()
+    var  maleRestRoomTasks=ArrayList<RestRoomTasks>()
+     private lateinit var viewModel: MaintainanceViewModel
     var selectedDate=""
         override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,34 +58,23 @@ class DownloadExcelsFragment : BaseFragment() {
     }
     private fun initView(){
 
-        tasksList.add(getString(R.string.cabins))
-        tasksList.add(getString(R.string.games_room))
-        tasksList.add(getString(R.string.work_station))
-        tasksList.add(getString(R.string.pantry))
-        tasksList.add(getString(R.string.rest_rooms))
-        tasksList.add(getString(R.string.general_area))
-        listOfRestRoomTimingsColumns.add("7:00");
-        listOfRestRoomTimingsColumns.add("8:00");
-        listOfRestRoomTimingsColumns.add("9:00");
-        listOfRestRoomTimingsColumns.add("10:00");
-        listOfRestRoomTimingsColumns.add("11:00");
-        listOfRestRoomTimingsColumns.add("12:00");
-        listOfRestRoomTimingsColumns.add("13:00");
-        listOfRestRoomTimingsColumns.add("14:00");
-        listOfRestRoomTimingsColumns.add("15:00");
-        listOfRestRoomTimingsColumns.add("16:00");
-        listOfRestRoomTimingsColumns.add("17:00");
-        listOfRestRoomTimingsColumns.add("18:00");
-        listOfRestRoomTimingsColumns.add("19:00");
-        listOfRestRoomTimingsColumns.add("20:00");
+//        tasksList.add(getString(R.string.cabins))
+//        tasksList.add(getString(R.string.games_room))
+//        tasksList.add(getString(R.string.work_station))
+//        tasksList.add(getString(R.string.pantry))
+//        tasksList.add(getString(R.string.rest_rooms))
+//        tasksList.add(getString(R.string.general_area))
+        tasksList = resources.getStringArray(R.array.task_tables).toList() as ArrayList<String>
 
+        listOfTimingsColumns = resources.getStringArray(R.array.timings).toList() as ArrayList<String>
 
         binding.etSelectTaskInput.setOnClickListener {
-            println("etSelectTask:: ")
             openDialog(getString(R.string.select_task),tasksList)
         }
         binding.etSelectDateInput.setOnClickListener {
-           setCalender()
+          Utils.setCalender(requireActivity()) {
+              binding.etSelectDateInput.setText(it)
+          }
 
         }
         binding.download.setOnClickListener {
@@ -90,52 +82,76 @@ class DownloadExcelsFragment : BaseFragment() {
              selectedDate= binding.etSelectDateInput.text.toString()
             var selectedTask = binding.etSelectTaskInput.text.toString()
 //            var selectedTable = getColumName(selectedTask)
+            println("selectedTask::"+selectedTask)
             when(selectedTask){
                 getString(R.string.pantry) ->  viewModel.getAllPantryTasksbydate(selectedDate)
-                getString(R.string.rest_rooms) -> viewModel.getAllRestRoomTasksDateWise(selectedDate)
+                getString(R.string.rest_rooms) -> requestToRestRoomData()
             }
 
         }
     }
+    fun requestToRestRoomData(){
+        viewModel.getAllRestRoomTasksDateWise(selectedDate)
+    }
     private fun requestViewModel(){
         viewModel = ViewModelProvider(this)[MaintainanceViewModel::class.java]
         viewModel.getAllRestRoomColumnData()
+        viewModel.getAllPantryColumnns()
+
 
     }
     private fun Observers(){
         viewModel.getAllPantryTasksByDateWise().observe(viewLifecycleOwner){
 
             println("getAllPantryTasksByDateWise:: "+it)
-          var isExcelGenerated= ExcelUtils.exportPantryDataIntoWorkbook(
+       /*   var isExcelGenerated= ExcelUtils.exportPantryDataIntoWorkbook(
               context,
               Constants.PANTRY_EXCEL_FILE_NAME + selectedDate + Constants.EXTENSION,
               selectedDate,
               it
-          )
+          )*/
+            var  restRoomTasks= it.groupBy { it.created_time }
+
+            var isExcelGenerated= ExcelUtils.exportPantryDataIntoWorkbook(
+                context,
+                Constants.PANTRY_EXCEL_FILE_NAME + "($selectedDate)" + Constants.EXTENSION,
+                selectedDate, restRoomTasks, listOfPantryColumns , listOfTimingsColumns
+            )
 
             if(isExcelGenerated){
-                dowloadAlert("Excel Download Successful")
+                Utils.showAlertDialog(requireActivity(),"Excel Download Successful")
             }else{
-                dowloadAlert("Unable to Download Excel. Please try again..")
+                Utils.showAlertDialog(requireActivity(),"Unable to Download Excel. Please try again..")
 
             }
         }
         viewModel.getAllRestroomColumns().observe(viewLifecycleOwner) { it ->
             listOfRestRoomColumns = it as ArrayList<String>
         }
+        viewModel.getAllPantryColumnsRequest().observe(viewLifecycleOwner) { it ->
+            listOfPantryColumns = it as ArrayList<String>
+        }
         viewModel.getAllRestRoomTasksByDateWise().observe(viewLifecycleOwner){
-           var restRoomTasks= it.groupBy { it.created_time }
+            maleRestRoomTasks = it as ArrayList<RestRoomTasks>
            /* it.forEach {it1->
                 var hashMap = HashMap<String,RestRoomTasks>()
                 hashMap[it1.created_time] = it1
                 restRoomTasks.add(hashMap)
             }*/
-            println("getAllRestRoomTasksByDateWise:: "+restRoomTasks)
+            viewModel.sendRequestToAllFemaleRestRoomData(selectedDate)
+
+
+        }
+        viewModel.getFemaleRestroomTasksByDateTime().observe(viewLifecycleOwner){
+            var femaleRestRoomTasksmaleRestRoomTasks = it as ArrayList<FemaleRestRoomTasks>
+
+            var restRoomTasks= maleRestRoomTasks.groupBy { it.created_time }
+            var femaleRestRoomTasks= femaleRestRoomTasksmaleRestRoomTasks.groupBy { it.created_time }
 
             var isExcelGenerated= ExcelUtils.exportRestRoomDataIntoWorkbook(
                 context,
-                Constants.RESTROOM_EXCEL_FILE_NAME + "11($selectedDate)" + Constants.EXTENSION,
-                selectedDate, restRoomTasks, listOfRestRoomColumns, listOfRestRoomTimingsColumns
+                Constants.RESTROOM_EXCEL_FILE_NAME + "($selectedDate)5656" + Constants.EXTENSION,
+                selectedDate, restRoomTasks,femaleRestRoomTasks, listOfRestRoomColumns, listOfTimingsColumns
             )
 //            var isExcelGenerated=  ExcelUtils.exportPantryDataIntoWorkbook(context, Constants.PANTRY_EXCEL_FILE_NAME+selectedDate+Constants.EXTENSION,selectedDate,it)
 
@@ -168,69 +184,13 @@ class DownloadExcelsFragment : BaseFragment() {
         alertDialog.show()
     }
 
-    private fun setCalender(){
-        val c = Calendar.getInstance()
-
-        // on below line we are getting
-        // our day, month and year.
-        val year = c.get(Calendar.YEAR)
-        val month = c.get(Calendar.MONTH)
-        val day = c.get(Calendar.DAY_OF_MONTH)
-
-        // on below line we are creating a
-        // variable for date picker dialog.
-        val datePickerDialog = DatePickerDialog(
-            // on below line we are passing context.
-            requireActivity(),
-            { view, year, monthOfYear, dayOfMonth ->
-                // on below line we are setting
-                // date to our edit text.
-                val dat = (dayOfMonth.toString() + "-" + (monthOfYear + 1) + "-" + year)
-                binding.etSelectDateInput.setText(dat)
-            },
-            // on below line we are passing year, month
-            // and day for the selected date in our date picker.
-            year,
-            month,
-            day
-        )
-        // at last we are calling show
-        // to display our date picker dialog.
-        datePickerDialog.show()
-    }
-    private fun getColumName(selectedTask:String):String{
+  /*  private fun getColumName(selectedTask:String):String{
         var value=""
         when(selectedTask){
             getString(R.string.pantry) -> value = Constants.pantry_tasks_table
             getString(R.string.rest_rooms) -> value = Constants.restroom_tasks_table
         }
        return value
-    }
-
-    private fun dowloadAlert(title:String)
-    {
-
-            val builder = AlertDialog.Builder(requireActivity())
-            builder.setMessage(title)
-            builder.setTitle(getString(R.string.dmss))
-            builder.setCancelable(false)
-            builder.setPositiveButton(
-                Html.fromHtml("<font color=" + this.resources.getColor(R.color.black) + ">OK</font>"),
-                DialogInterface.OnClickListener {
-                        dialog: DialogInterface, _: Int -> dialog.dismiss()
-                    dialog.dismiss()
-
-
-                })
-           /* builder.setNegativeButton(
-                Html.fromHtml("<font color=" + this.resources.getColor(R.color.black) + ">No</font>"),
-                DialogInterface.OnClickListener {
-                        dialog: DialogInterface, _: Int -> dialog.dismiss()
-                    dialog.dismiss()
-                })*/
-            val alertDialog = builder.create()
-            // Show the Alert Dialog box
-            alertDialog.show()
-        }
+    }*/
 
 }

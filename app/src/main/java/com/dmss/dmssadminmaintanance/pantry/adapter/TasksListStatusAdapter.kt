@@ -17,12 +17,13 @@ RecyclerView.Adapter<TasksListStatusAdapter.ViewHolder>() {
         @SuppressLint("SetTextI18n")
         fun bind(dataSet: TaskData) {
             val context = binding.root.context
-            binding.title.text = dataSet.category
+            binding.title.text = dataSet.category.replace("_"," ").replaceFirstChar ( Char::uppercase)
             binding.subTitle.text = dataSet.subCategory
             binding.date.text = dataSet.date
 //            binding.taskImg.text = "Amount : " + dataSet.amount
             binding.status.text = dataSet.status
             binding.month.text = dataSet.month
+            binding.assignTo.text = "Assigned To : "+dataSet.assignTo
 
             if(dataSet.status=="Completed"){
                 binding.status.setTextColor(Color.parseColor("#FF018786"));

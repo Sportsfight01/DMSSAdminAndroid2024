@@ -22,13 +22,5 @@
             android:id="@+id/action_addNoteFragment_to_home_fragment1"
             app:destination="@id/fragment_dashboard" />
     </fragment>
-    <fragment
-        android:id="@+id/pantryHomeFragment"
-        android:name="com.dmss.dmssadminmaintanance.pantry.PantryTasksFragment"
-        android:label="Pantry Fragment"
-        tools:layout="@layout/fragment_pantry_tasks" >
-        <action
-            android:id="@+id/action_addNoteFragment_to_home_fragment1"
-            app:destination="@id/fragment_dashboard" />
-    </fragment>
+
 </navigation>

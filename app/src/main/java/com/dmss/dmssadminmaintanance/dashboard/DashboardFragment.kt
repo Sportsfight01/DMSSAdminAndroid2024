@@ -1,7 +1,11 @@
 package com.dmss.dmssadminmaintanance.dashboard
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.content.Context
+import android.content.DialogInterface
 import android.os.Bundle
+import android.text.Html
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +16,9 @@ import androidx.navigation.fragment.findNavController
 import com.dmss.dmssadminmaintanance.BaseFragment
 import com.dmss.dmssadminmaintanance.R
 import com.dmss.dmssadminmaintanance.databinding.FragmentDashboardBinding
+import com.dmss.dmssadminmaintanance.databinding.LayoutDailogListViewBinding
+import com.dmss.dmssadminmaintanance.model.Utils
+import com.dmss.dmssadminmaintanance.pantry.adapter.CommanAdapter
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -33,6 +40,7 @@ class DashboardFragment : BaseFragment(){
     private var param1: String? = null
     private var param2: String? = null
     private lateinit var binding : FragmentDashboardBinding
+    private  var genderList :ArrayList<String> = ArrayList<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,6 +69,7 @@ class DashboardFragment : BaseFragment(){
     }
     fun initView(){
 
+
         binding.cvCabins.setOnClickListener {
 //            navigateTo(R.id.fragment_tasks_list)
         }
@@ -77,7 +86,10 @@ class DashboardFragment : BaseFragment(){
             navigateTo(R.id.pantryHomeFragment)
         }
         binding.cvRestRooms.setOnClickListener {
-            navigateTo(R.id.restRoomHomeFragment)
+            genderList = resources.getStringArray(R.array.gender) .toList() as ArrayList<String>
+//            genderList.add("Male")
+//            genderList.add("Female")
+            openDialog("Select Gender",genderList)
         }
         binding.cvGenralArea.setOnClickListener {
 //            Toast.makeText(requireActivity(),"Development in progress..", Toast.LENGTH_SHORT).show()
@@ -97,75 +109,24 @@ class DashboardFragment : BaseFragment(){
             currentCodePath = absolutePath
         }
     }
-  /*  private fun createXcelFile(){
-        *//*val filePath = Environment.getExternalFilesDir()
-            .absolutePath + "/MyFolder/"*//*
-        val filePath = createCodeFile().path
-        println("filePath::"+filePath)
-        try {
+    private fun openDialog(dropFrom: String, listArr: ArrayList<String>) {
 
-            val root = File(filePath)
-//            if (!root.exists()) {
-            root.mkdirs()
-//            }
-            val f = File(filePath)
-            if (f.exists()) {
-                f.delete()
-            }
-            f.createNewFile()
+        var layoutDailogListViewBinding = LayoutDailogListViewBinding.inflate(layoutInflater)
+        val shareAlertBuilder: AlertDialog.Builder = AlertDialog.Builder(requireActivity())
+        shareAlertBuilder.setView(layoutDailogListViewBinding.root)
+        layoutDailogListViewBinding.tvHeader.text = dropFrom
 
-            val out = FileOutputStream(f)
-            println("FileOutputStream::"+out)
-            out.flush()
-            out.close()
-        } catch (e: java.lang.Exception) {
-            e.printStackTrace()
+        val alertDialog: AlertDialog = shareAlertBuilder.create()
+        layoutDailogListViewBinding.listView.adapter = CommanAdapter(requireActivity(), listArr)
+        layoutDailogListViewBinding.listView.setOnItemClickListener { parent, view, position, id ->
+
+           Utils.selectedGender=listArr[position]
+           navigateTo(R.id.restRoomHomeFragment)
+            /*  else if(dropFrom == getString(R.string.select_date)){
+                  binding.etSelectDateInput.setText(listArr[position])
+              }*/
+            alertDialog.dismiss()
         }
-
-        val root: File = File(filePath)
-        println("root:: "+root)
-        *//*  var  filePath = File(
-              rootPath )
-           println("filePath:: "+filePath)
-   *//*
-        try {
-            if (!root.exists()) {
-                val hssfWorkbook = HSSFWorkbook()
-                val hssfSheet = hssfWorkbook.createSheet("MySheet")
-
-                val hssfRow = hssfSheet.createRow(0)
-                val hssfCell = hssfRow.createCell(0)
-
-                hssfCell.setCellValue("Name")
-                root.createNewFile()
-                val fileOutputStream: FileOutputStream = FileOutputStream(filePath)
-                hssfWorkbook.write(fileOutputStream)
-//                eName.setText("")
-                Toast.makeText(activity, "File Created", Toast.LENGTH_SHORT).show()
-
-                if (fileOutputStream != null) {
-                    fileOutputStream.flush()
-                    fileOutputStream.close()
-                }
-            } else {
-                val fileInputStream: FileInputStream = FileInputStream(filePath)
-                val hssfWorkbook = HSSFWorkbook(fileInputStream)
-                val hssfSheet = hssfWorkbook.getSheetAt(0)
-                var lastRowNum = hssfSheet.lastRowNum
-
-                val hssfRow = hssfSheet.createRow(++lastRowNum)
-                hssfRow.createCell(0).setCellValue("Durga Prasad")
-
-                fileInputStream.close()
-
-                val fileOutputStream: FileOutputStream = FileOutputStream(filePath)
-                hssfWorkbook.write(fileOutputStream)
-//                eName.setText("")
-                Toast.makeText(activity, "File Updated", Toast.LENGTH_SHORT).show()
-                fileOutputStream.close()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }*/
+        alertDialog.show()
+    }
 }

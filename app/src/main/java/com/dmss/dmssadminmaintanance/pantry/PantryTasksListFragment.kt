@@ -1,5 +1,6 @@
 package com.dmss.dmssadminmaintanance.pantry
 
+import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -16,10 +17,13 @@ import com.dmss.admin.db.viewmodel.MaintainanceViewModel
 import com.dmss.dmssadminmaintanance.BaseFragment
 import com.dmss.dmssadminmaintanance.R
 import com.dmss.dmssadminmaintanance.databinding.FragmentPantryTasksListBinding
+import com.dmss.dmssadminmaintanance.databinding.LayoutDailogListViewBinding
 import com.dmss.dmssadminmaintanance.db.PantryTasks
+import com.dmss.dmssadminmaintanance.db.RestRoomTasks
 import com.dmss.dmssadminmaintanance.model.CheckBoxModel
 import com.dmss.dmssadminmaintanance.model.TaskData
 import com.dmss.dmssadminmaintanance.model.Utils
+import com.dmss.dmssadminmaintanance.pantry.adapter.CommanAdapter
 import com.dmss.dmssadminmaintanance.pantry.adapter.PantryTasksAdapter
 import com.dmss.dmssadminmaintanance.xcelsheet.Constants
 import com.dmss.dmssadminmaintanance.xcelsheet.ExcelUtils
@@ -37,6 +41,7 @@ class PantryTasksListFragment : BaseFragment() {
     var selectedItems: ArrayList<CheckBoxModel> = ArrayList<CheckBoxModel>()
     var listTaskData = ArrayList<PantryTasks>()
     var assigendList = ArrayList<String>()
+    var assigendToPersonList = ArrayList<String>()
 
     lateinit var checkBoxRecycleviewAdapter :PantryTasksAdapter
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,15 +54,14 @@ class PantryTasksListFragment : BaseFragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentPantryTasksListBinding.inflate(inflater, container, false)
+        requestViewModel()
+        Observers()
         initView()
 
         return binding.root
     }
     fun initView() {
-        binding.filterLayout.ciCalender.setOnClickListener {
-            setCalender()
-        }
-         checkBoxRecycleviewAdapter = PantryTasksAdapter { it ->
+        checkBoxRecycleviewAdapter = PantryTasksAdapter(getString(R.string.pantry)) { it ->
             selectedItems = it as ArrayList<CheckBoxModel>
         }
         val layoutManager =
@@ -65,11 +69,32 @@ class PantryTasksListFragment : BaseFragment() {
 
         binding.rvPantry.layoutManager = layoutManager
 
+        var currentHour=Utils.getCurrentHour()
+        binding.filterLayout.selectTime.setText(currentHour)
+        binding.filterLayout.submit.setText(getString(R.string.assign))
+
+        refreshList()
+        binding.filterLayout.selectTime.setOnClickListener {
+            PopupMenu(requireActivity(), binding.filterLayout.selectTime).apply {
+                menuInflater.inflate(R.menu.spinner_items, menu)
+                setOnMenuItemClickListener { item ->
+                    binding.filterLayout.selectTime.setText(item.title)
+                    refreshList()
+
+                    true
+                }
+            }. show()
+        }
+        binding.filterLayout.llTimer.visibility=View.VISIBLE
+
+        binding.filterLayout.ciCalender.setOnClickListener {
+            setCalender()
+        }
+
         binding.rvPantry.adapter = checkBoxRecycleviewAdapter
         binding.filterLayout.selectedDate.setText(Utils.getCurrentDate())
 
-        viewModel = ViewModelProvider(this)[MaintainanceViewModel::class.java]
-        viewModel.getAllPantryTasksbydate1(binding.filterLayout.selectedDate.text.toString(),true)
+        viewModel.getAllPantryTasksbydate1(binding.filterLayout.selectedDate.text.toString(),binding.filterLayout.selectTime.text.toString(),true)
         viewModel.getAllPantryTasksByDate().observe(viewLifecycleOwner){
             println("listTaskData:: "+it.size)
             assigendList.clear()
@@ -78,10 +103,12 @@ class PantryTasksListFragment : BaseFragment() {
                 assigendList.add(it.task_name)
             }
 
-            viewModel.getAllPantryColumnByData()
+            viewModel.getAllPantryColumnsRequest()
 
         }
-        viewModel.getAllPantryColumns().observe(viewLifecycleOwner) { it ->
+        viewModel.getAllPantryColumnns().observe(viewLifecycleOwner) { it ->
+            println("listTaskData:: "+it.size)
+
             coulumnNames = it
             pantryListDataArr.clear()
             it.forEach {
@@ -112,48 +139,23 @@ class PantryTasksListFragment : BaseFragment() {
 
         })
         binding.filterLayout.submit.setOnClickListener {
-         /*   val formatter = SimpleDateFormat("yyyy-MM-dd")
-            val date = Date()
-            val current = formatter.format(date)*/
-            var selectedDate=binding.filterLayout.selectedDate.text
-            var dataList= ArrayList<PantryTasks>()
-
-            println("selectedDate:: "+selectedDate)
-
-            var selectedext = ""
-            coulumnNames.forEach {it1->
-                var isCompleted=false
-                selectedItems.forEach { it2->
-                    selectedext = selectedext + "," + it2.text
-                    if(it2.text==it1){
-                        isCompleted =true
-                    }
-                }
-                pantryListDataArr.add( PantryTasks(it1,selectedDate.toString(),isCompleted,false) )
-            }
-            val listlastSize=pantryListDataArr.size-1
-            println("pantryListDataArr:: "+pantryListDataArr.size)
-            pantryListDataArr.forEachIndexed{ index, element ->
-                viewModel.insertPantryTasks(element)
-                dataList.add(element)
-                if(index==listlastSize){
-                    Thread.sleep(1000)
-                    viewModel.getAllPantryTasksbydate1(binding.filterLayout.selectedDate.text.toString(),true)
-                  listArr.clear()
-                    checkBoxRecycleviewAdapter.loadItems(listArr)
-
-                    Toast.makeText(context,"Tasks Assigned Success..",Toast.LENGTH_SHORT).show()
-
-
-                }
-            }
-            assigendList.clear()
-
-//       viewModel.allPantryTasksDataBydate?.observe(viewLifecycleOwner){
-//           println("List of pantryTaksEntityData:: $it")
-//       }
+            openAssignedPersonDialog(assigendToPersonList)
         }
 
+    }
+    fun requestViewModel(){
+        viewModel = ViewModelProvider(this)[MaintainanceViewModel::class.java]
+        viewModel.getAssignedPersonRequest()
+
+    }
+    fun Observers(){
+        viewModel.getAssignTaskPersons().observe(viewLifecycleOwner){
+            println("getAssignTaskPersons::"+it)
+            it.forEach {
+                assigendToPersonList.add(it.name)
+            }
+
+        }
     }
     private fun setCalender(){
         val c = Calendar.getInstance()
@@ -174,9 +176,12 @@ class PantryTasksListFragment : BaseFragment() {
                 // date to our edit text.
                 val dat = (dayOfMonth.toString() + "-" + (monthOfYear + 1) + "-" + year)
                 binding.filterLayout.selectedDate.setText(dat)
-                viewModel.getAllPantryTasksbydate1(binding.filterLayout.selectedDate.text.toString(),true)
+               /* viewModel.getAllPantryTasksbydate1(binding.filterLayout.selectedDate.text.toString(),true)
                 listArr.clear()
-                checkBoxRecycleviewAdapter.loadItems(listArr)
+                checkBoxRecycleviewAdapter.loadItems(listArr)*/
+
+
+                refreshList()
             },
             // on below line we are passing year, month
             // and day for the selected date in our date picker.
@@ -187,5 +192,64 @@ class PantryTasksListFragment : BaseFragment() {
         // at last we are calling show
         // to display our date picker dialog.
         datePickerDialog.show()
+    }
+    private fun refreshList(){
+        listArr.clear()
+        checkBoxRecycleviewAdapter.loadItems(listArr)
+
+        viewModel.getAllPantryTasksbydate1(binding.filterLayout.selectedDate.text.toString(),binding.filterLayout.selectTime.text.toString(),true)
+    }
+    private fun openAssignedPersonDialog( listArr: ArrayList<String>) {
+
+        var layoutDailogListViewBinding = LayoutDailogListViewBinding.inflate(layoutInflater)
+        val shareAlertBuilder: AlertDialog.Builder = AlertDialog.Builder(requireActivity())
+        shareAlertBuilder.setView(layoutDailogListViewBinding.root)
+        layoutDailogListViewBinding.tvHeader.text = "Assigned To"
+
+        val alertDialog: AlertDialog = shareAlertBuilder.create()
+        layoutDailogListViewBinding.listView.adapter = CommanAdapter(requireActivity(), listArr)
+        layoutDailogListViewBinding.listView.setOnItemClickListener { parent, view, position, id ->
+            var selectedItem=listArr[position]
+            Utils.confirmationAlertAlertDialog(requireActivity(),"Are you sure! Do you want to assign task to $selectedItem ?"){
+                if(it){
+                    updateData(selectedItem)
+                }
+            }
+            /*  else if(dropFrom == getString(R.string.select_date)){
+                  binding.etSelectDateInput.setText(listArr[position])
+              }*/
+            alertDialog.dismiss()
+        }
+        alertDialog.show()
+    }
+
+    fun updateData(selectedItem:String){
+        var selectedDate=binding.filterLayout.selectedDate.text
+        var selectedTime=binding.filterLayout.selectTime.text
+
+        println("selectedDate:: "+selectedDate)
+        var selectedext = ""
+        coulumnNames.forEach {it1->
+            var isCompleted=false
+            selectedItems.forEach { it2->
+                selectedext = selectedext + "," + it2.text
+                if(it2.text==it1){
+                    isCompleted =true
+                }
+            }
+            pantryListDataArr.add( PantryTasks(it1,selectedDate.toString(),selectedTime.toString(),selectedItem,isCompleted,false) )
+        }
+        val listlastSize=pantryListDataArr.lastIndex
+
+        pantryListDataArr.forEachIndexed{ index, element ->
+//                println("element:: "+element)
+            viewModel.insertPantryTasks(element)
+            if(index==listlastSize){
+                Thread.sleep(500)
+                refreshList()
+                Toast.makeText(context,"Tasks Assigned Success..", Toast.LENGTH_SHORT).show()
+
+            }
+        }
     }
 }

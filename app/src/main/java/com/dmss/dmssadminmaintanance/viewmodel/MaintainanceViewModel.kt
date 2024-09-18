@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.dmss.dmssadminmaintanance.db.AssignTaskToPersonEntityData
+import com.dmss.dmssadminmaintanance.db.FemaleRestRoomTasks
 
 import com.dmss.dmssadminmaintanance.db.MaintenanceDB
 import com.dmss.dmssadminmaintanance.db.PantryEntityData
@@ -30,6 +31,9 @@ class MaintainanceViewModel(application: Application) : AndroidViewModel(applica
     val allRestRoomPendingTasksDataBydate=MutableLiveData<List<RestRoomTasks>>()
     val allRestRoomCompletedTasksDataBydate=MutableLiveData<List<RestRoomTasks>>()
     val allRestRoomTasksByDateWise=MutableLiveData<List<RestRoomTasks>>()
+    val femaleRestRoomTasksByDateTimeWise=MutableLiveData<List<FemaleRestRoomTasks>>()
+    val femaleRestRoomAssignedTasksByDateTimeWise=MutableLiveData<List<FemaleRestRoomTasks>>()
+    val femaleRestRoomCompletedTasksByDateTimeWise=MutableLiveData<List<FemaleRestRoomTasks>>()
 
 
 
@@ -90,7 +94,7 @@ class MaintainanceViewModel(application: Application) : AndroidViewModel(applica
         return allPantryTasksByDate
     }
 
-   fun getAllPantryColumnByData() :LiveData<List<String>>{
+   fun getAllPantryColumnns() :LiveData<List<String>>{
       return pantryAllCoulumns
   }
      fun getAllRestRoomColumnData()  :LiveData<List<String>>{
@@ -105,7 +109,22 @@ class MaintainanceViewModel(application: Application) : AndroidViewModel(applica
     fun updatePantry(pantryEntityData: PantryEntityData) =viewModelScope.launch(Dispatchers.IO){
         maintananceRepository.updatePantry(pantryEntityData)
     }
+    fun getFemaleRestroomTasksByDateTime(): LiveData<List<FemaleRestRoomTasks>>{
 
+        return femaleRestRoomTasksByDateTimeWise
+    }
+    fun getFemaleRestroomAssignedTasksByDateTime(): LiveData<List<FemaleRestRoomTasks>>{
+
+        return femaleRestRoomAssignedTasksByDateTimeWise
+    }
+    fun getFemaleRestroomCompletedTasksByDateTime(): LiveData<List<FemaleRestRoomTasks>>{
+
+        return femaleRestRoomCompletedTasksByDateTimeWise
+    }
+
+    /*fun insertPantryTasks(pantryTasks: PantryTasks) = viewModelScope.launch(Dispatchers.IO){
+        maintananceRepository.insertPantryTasks(pantryTasks)
+    }*/
     fun insertPantryTasks(pantryTasks: PantryTasks) = viewModelScope.launch(Dispatchers.IO){
         maintananceRepository.insertPantryTasks(pantryTasks)
     }
@@ -114,6 +133,9 @@ class MaintainanceViewModel(application: Application) : AndroidViewModel(applica
     }
     fun updatePantryTasks(pantryTasks: PantryTasks) =viewModelScope.launch(Dispatchers.IO){
         maintananceRepository.updatePantryTasks(pantryTasks)
+    }
+    fun deletedAssignTaskToPerson(assignTaskToPersonEntityData: AssignTaskToPersonEntityData) = viewModelScope.launch (Dispatchers.IO){
+        maintananceRepository.deletedAssignTaskToPerson(assignTaskToPersonEntityData)
     }
 
     fun getAssignedPersonRequest():LiveData<List<AssignTaskToPersonEntityData>>{
@@ -135,9 +157,9 @@ class MaintainanceViewModel(application: Application) : AndroidViewModel(applica
         }
         return allPantryTasksByDate
     }
-    fun getAllPantryTasksbydate1(date:String,isAssigned:Boolean): LiveData<List<PantryTasks>>{
+    fun getAllPantryTasksbydate1(date:String,time: String,isAssigned:Boolean): LiveData<List<PantryTasks>>{
         CoroutineScope(Dispatchers.IO+exceptionHandler).launch {
-            val res=maintananceRepository.getAllPantryTasks(date,isAssigned)
+            val res=maintananceRepository.getAllPantryTasks(date,time,isAssigned)
             var resLivdata=MutableLiveData<List<PantryTasks>>()
             resLivdata.postValue(res)
             println("getAllPantryTasksbydate1:: "+res)
@@ -145,9 +167,10 @@ class MaintainanceViewModel(application: Application) : AndroidViewModel(applica
         }
         return allPantryTasksDataBydate
     }
-    fun getAllPantryTasksCompeted(date:String,isAssigned:Boolean,isCompleted:Boolean): LiveData<List<PantryTasks>>{
+    fun getAllPantryTasksCompeted(date:String,time:String,isAssigned:Boolean,isCompleted:Boolean): LiveData<List<PantryTasks>>{
         CoroutineScope(Dispatchers.IO+exceptionHandler).launch {
-            val res=maintananceRepository.getAllPantryTasksCompleted(date,isAssigned,isCompleted)
+            val res=maintananceRepository.getAllPantryTasksCompleted(date,time
+                    ,isAssigned,isCompleted)
             var resLivdata=MutableLiveData<List<PantryTasks>>()
             resLivdata.postValue(res)
             println("getAllPantryTasksbydate1:: "+res)
@@ -155,9 +178,9 @@ class MaintainanceViewModel(application: Application) : AndroidViewModel(applica
         }
         return allPantryCompletedTasksByDate
     }
-    fun getAllPantryTasksAssigned(date:String,isAssigned:Boolean,isCompleted:Boolean): LiveData<List<PantryTasks>>{
+    fun getAllPantryTasksAssigned(date:String,time:String,isAssigned:Boolean,isCompleted:Boolean): LiveData<List<PantryTasks>>{
         CoroutineScope(Dispatchers.IO+exceptionHandler).launch {
-            val res=maintananceRepository.getAllPantryTasksAssigned(date,isAssigned,isCompleted)
+            val res=maintananceRepository.getAllPantryTasksAssigned(date,time,isAssigned,isCompleted)
             var resLivdata=MutableLiveData<List<PantryTasks>>()
             resLivdata.postValue(res)
             println("getAllPantryTasksbydate1:: "+res)
@@ -165,7 +188,7 @@ class MaintainanceViewModel(application: Application) : AndroidViewModel(applica
         }
         return allPantryPendingTasksByDate
     }
-    fun getAllPantryColumns(): LiveData<List<String>>{
+    fun getAllPantryColumnsRequest(): LiveData<List<String>>{
         CoroutineScope(Dispatchers.IO+exceptionHandler).launch {
             pantryAllCoulumns.postValue(maintananceRepository.getAColumnFromATable())
 
@@ -231,6 +254,51 @@ class MaintainanceViewModel(application: Application) : AndroidViewModel(applica
         }
         return allRestRoomTasksByDateWise
     }
+    fun sendRequestToAllFemaleRestRoomData(date: String):LiveData<List<FemaleRestRoomTasks>>{
+
+        CoroutineScope(Dispatchers.IO+exceptionHandler).launch {
+
+            val res = maintananceRepository.getFemaleRestRoomTaskByDate(date)
+
+            femaleRestRoomTasksByDateTimeWise.postValue(res)
+        }
+        return femaleRestRoomAssignedTasksByDateTimeWise
+    }
+    fun sendRequestToFemaleRestRoomOnlyAssignedTasks(date: String,time: String,isAssigned: Boolean,isCompleted: Boolean):LiveData<List<FemaleRestRoomTasks>>{
+
+        CoroutineScope(Dispatchers.IO+exceptionHandler).launch {
+
+            val res = maintananceRepository.getFemaleRestRoomTask(date, time, isAssigned, isCompleted)
+
+            femaleRestRoomAssignedTasksByDateTimeWise.postValue(res)
+        }
+        return femaleRestRoomAssignedTasksByDateTimeWise
+    }
+    fun sendRequestToFemaleRestRoomAssignedTasks(date: String,time: String,isAssigned: Boolean):LiveData<List<FemaleRestRoomTasks>>{
+
+        CoroutineScope(Dispatchers.IO+exceptionHandler).launch {
+
+            val res = maintananceRepository.getFemaleRestRoomAssignedTask(date, time, isAssigned)
+            println("sendRequestToFemaleRestRoomAssignedTasks::"+date+"  time:: "+" isAssigned:: "+isAssigned+"  RES:: "+res)
+
+            femaleRestRoomTasksByDateTimeWise.postValue(res)
+        }
+        return femaleRestRoomTasksByDateTimeWise
+    }
+    fun sendRequestToFemaleRestRoomCompletedTasks(date: String,time: String,isAssigned: Boolean,isCompleted: Boolean):LiveData<List<FemaleRestRoomTasks>>{
+
+        CoroutineScope(Dispatchers.IO+exceptionHandler).launch {
+
+            val res = maintananceRepository.getFemaleRestRoomTask(date, time, isAssigned, isCompleted)
+            println("sendRequestToFemaleRestRoomAssignedTasks::"+date+"  time:: "+" isAssigned:: "+isAssigned+"  RES:: "+res)
+
+            femaleRestRoomCompletedTasksByDateTimeWise.postValue(res)
+        }
+        return femaleRestRoomCompletedTasksByDateTimeWise
+    }
+    fun insertFemaleRestRoomTasks(femaleRestRoomTasks: FemaleRestRoomTasks) = viewModelScope.launch(Dispatchers.IO){
+        maintananceRepository.insertFemaleREstrom(femaleRestRoomTasks)
+    }
     fun insertRestRoomTasks(restRoomTasks: RestRoomTasks) = viewModelScope.launch(Dispatchers.IO){
         maintananceRepository.insertRestRoomTasks(restRoomTasks)
     }
@@ -239,6 +307,9 @@ class MaintainanceViewModel(application: Application) : AndroidViewModel(applica
     }
     fun updateRestRoomTasks(restRoomTasks: RestRoomTasks) =viewModelScope.launch(Dispatchers.IO){
         maintananceRepository.updateRestRoomTasksData(restRoomTasks)
+    }
+    fun updateFemaleRestRoomTasks(restRoomTasks: FemaleRestRoomTasks) =viewModelScope.launch(Dispatchers.IO){
+        maintananceRepository.updateFemaleRestRoomTasksData(restRoomTasks)
     }
     fun updateRestRoomPendingTasks(date: String,isAssigned:Boolean,isCompleted:Boolean) =viewModelScope.launch(Dispatchers.IO){
         maintananceRepository.updateRestRoomPendingTasksData(date,isAssigned,isCompleted)

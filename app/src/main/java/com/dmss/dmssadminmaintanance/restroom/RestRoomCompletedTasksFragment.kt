@@ -50,23 +50,33 @@ class RestRoomCompletedTasksFragment : BaseFragment() {
         return binding.root
     }
     private fun initView() {
+        binding.filterLayout.llTimer.visibility=View.VISIBLE
+        binding.filterLayout.submit.visibility=View.GONE
+        binding.filterLayout.tvAll.visibility=View.GONE
+        binding.filterLayout.ctSelectAll.visibility=View.GONE
+
+        var currentHour=Utils.getCurrentHour()
+        binding.filterLayout.selectTime.setText(currentHour)
         binding.filterLayout.ciTimer.visibility=View.VISIBLE
         binding.filterLayout.selectedDate.setText(Utils.getCurrentDate())
         viewModel = ViewModelProvider(this)[MaintainanceViewModel::class.java]
-        viewModel.getAllRestRoomTasksCompleted(binding.filterLayout.selectedDate.text.toString(),binding.filterLayout.selectTime.text.toString(), isAssigned = true, isCompleted = true)
+        refreshList()
+//        viewModel.getAllRestRoomTasksCompleted(binding.filterLayout.selectedDate.text.toString(),binding.filterLayout.selectTime.text.toString(), isAssigned = true, isCompleted = true)
         binding.filterLayout.selectTime.setOnClickListener {
             PopupMenu(requireActivity(), binding.filterLayout.selectTime).apply {
                 menuInflater.inflate(R.menu.spinner_items, menu)
                 setOnMenuItemClickListener { item ->
                     binding.filterLayout.selectTime.setText(item.title)
                     refreshList()
-
                     true
                 }
             }. show()
         }
         binding.filterLayout.ciCalender.setOnClickListener {
-            setCalender()
+            Utils.setCalender(requireActivity()) {
+                binding.filterLayout.selectedDate.setText(it)
+                refreshList()
+            }
         }
 
 //        viewModel.AllPantryTaksBydata("19-08-2024")
@@ -79,14 +89,34 @@ class RestRoomCompletedTasksFragment : BaseFragment() {
                 if(it.isCompleted){
                     isCompleted="Completed"
                 }
-                listTaskData.add(TaskData(it.task_name, ""+index, "", date[0], date[1], isCompleted))
+                listTaskData.add(TaskData(it.task_name, ""+index, "", date[0], date[1], it.AssignedTo,isCompleted))
             }
 
 
             binding.rvPantry.layoutManager = LinearLayoutManager(activity)
              checkBoxRecycleviewAdapter = TasksListStatusAdapter(listTaskData) {
                 println("FilteredList:: " + it)
-//                navigateToStatusUpdate(it)
+
+            }
+            binding.rvPantry.adapter = checkBoxRecycleviewAdapter
+
+        }
+        viewModel.getFemaleRestroomCompletedTasksByDateTime().observe(viewLifecycleOwner){
+            println("getAllPantryTasksbydate Fragment :: "+it)
+            listTaskData.clear()
+            it.forEachIndexed { index, it ->
+                var isCompleted="Pending"
+                var date=it.created_date.split("-")
+                if(it.isCompleted){
+                    isCompleted="Completed"
+                }
+                listTaskData.add(TaskData(it.task_name, ""+index, "", date[0], date[1], it.AssignedTo,isCompleted))
+            }
+
+
+            binding.rvPantry.layoutManager = LinearLayoutManager(activity)
+            checkBoxRecycleviewAdapter = TasksListStatusAdapter(listTaskData) {
+                println("FilteredList:: " + it)
 
             }
             binding.rvPantry.adapter = checkBoxRecycleviewAdapter
@@ -101,40 +131,23 @@ class RestRoomCompletedTasksFragment : BaseFragment() {
              bundleOf(AppConstants.BundleKey.HomeData to selectedItem)
          )
      }*/
-    private fun setCalender(){
-        val c = Calendar.getInstance()
 
-        // on below line we are getting
-        // our day, month and year.
-        val year = c.get(Calendar.YEAR)
-        val month = c.get(Calendar.MONTH)
-        val day = c.get(Calendar.DAY_OF_MONTH)
-
-        // on below line we are creating a
-        // variable for date picker dialog.
-        val datePickerDialog = android.app.DatePickerDialog(
-            // on below line we are passing context.
-            requireActivity(),
-            { view, year, monthOfYear, dayOfMonth ->
-                // on below line we are setting
-                // date to our edit text.
-                val dat = (dayOfMonth.toString() + "-" + (monthOfYear + 1) + "-" + year)
-                binding.filterLayout.selectedDate.setText(dat)
-
-
-            },
-            // on below line we are passing year, month
-            // and day for the selected date in our date picker.
-            year,
-            month,
-            day
-        )
-        // at last we are calling show
-        // to display our date picker dialog.
-        datePickerDialog.show()
-    }
     private fun refreshList(){
-        viewModel.getAllRestRoomTasksCompleted(binding.filterLayout.selectedDate.text.toString(),binding.filterLayout.selectTime.text.toString(), isAssigned = true, isCompleted = true)
+        if(Utils.selectedGender==getString(R.string.male)) {
+            viewModel.getAllRestRoomTasksCompleted(
+                binding.filterLayout.selectedDate.text.toString(),
+                binding.filterLayout.selectTime.text.toString(),
+                isAssigned = true,
+                isCompleted = true
+            )
+        }else{
+            viewModel.sendRequestToFemaleRestRoomCompletedTasks(
+                binding.filterLayout.selectedDate.text.toString(),
+                binding.filterLayout.selectTime.text.toString(),
+                isAssigned = true,
+                isCompleted = true
+            )
+        }
         listTaskData.clear()
     }
 }

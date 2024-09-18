@@ -22,6 +22,7 @@
     <string name="completed">Completed</string>
     <string name="assign">Assign</string>
     <string name="enter_name">Enter Name</string>
+    <string name="complete">Complete</string>
 
     <string name="comment">Comment</string>
     <string name="submit">Submit</string>
@@ -49,28 +50,42 @@
     <string name="pantry">Pantry</string>
     <string name="rest_rooms">Rest Rooms</string>
     <string name="reception">Reception</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
+    <string name="assign_to">Assign To</string>
 
     <string-array name="timings">
-        <item>7</item>
-        <item>8</item>
-        <item>9</item>
-        <item>10</item>
-        <item>11</item>
-        <item>12</item>
-        <item>13</item>
-        <item>14</item>
-        <item>15</item>
-        <item>16</item>
-        <item>17</item>
-        <item>18</item>
-        <item>19</item>
+        <item>7:00</item>
+        <item>8:00</item>
+        <item>9:00</item>
+        <item>10:00</item>
+        <item>11:00</item>
+        <item>12:00</item>
+        <item>13:00</item>
+        <item>14:00</item>
+        <item>15:00</item>
+        <item>16:00</item>
+        <item>17:00</item>
+        <item>18:00</item>
+        <item>19:00</item>
     </string-array>
-
+    <string-array name="gender">
+        <item>Male</item>
+        <item>Female</item>
+    </string-array>
+    <string-array name="task_tables">
+    <item>Cabins</item>
+    <item>Games Room</item>
+    <item>Work Station</item>
+    <item>Pantry</item>
+    <item>Rest Rooms</item>
+    <item>General Area</item>
+    </string-array>
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
         volutpat, dolor id interdum ullamcorper, risus dolor egestas lectus, sit amet mattis purus

@@ -8,6 +8,8 @@ data class CheckBoxModel (
     var checked:Boolean = false,
     var text:String = "",
     var date:String = "",
+    var assignTo:String = "",
+
     var id:Int = 0
 
 )

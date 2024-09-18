@@ -4,12 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import androidx.compose.material3.DatePickerDialog
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dmss.admin.db.viewmodel.MaintainanceViewModel
 import com.dmss.dmssadminmaintanance.BaseFragment
+import com.dmss.dmssadminmaintanance.R
 import com.dmss.dmssadminmaintanance.databinding.FragmentPendingTaskListBinding
 import com.dmss.dmssadminmaintanance.model.TaskData
 import com.dmss.dmssadminmaintanance.model.Utils
@@ -45,9 +47,28 @@ class CompletedTaskListFragment : BaseFragment() {
     }
     private fun initView() {
         binding.filterLayout.selectedDate.setText(Utils.getCurrentDate())
+        binding.filterLayout.llTimer.visibility=View.VISIBLE
+        binding.filterLayout.submit.visibility=View.GONE
+        binding.filterLayout.tvAll.visibility=View.GONE
+        binding.filterLayout.ctSelectAll.visibility=View.GONE
+        var currentHour=Utils.getCurrentHour()
+        binding.filterLayout.selectTime.setText(currentHour)
         viewModel = ViewModelProvider(this)[MaintainanceViewModel::class.java]
-        viewModel.getAllPantryTasksCompeted(binding.filterLayout.selectedDate.text.toString(), isAssigned = true, isCompleted = true)
+    /*    viewModel.getAllPantryTasksCompeted(binding.filterLayout.selectedDate.text.toString(),
+                binding.filterLayout.selectTime.text.toString(), isAssigned = true, isCompleted = true)*/
+        refreshList()
 
+        binding.filterLayout.selectTime.setOnClickListener {
+            PopupMenu(requireActivity(), binding.filterLayout.selectTime).apply {
+                menuInflater.inflate(R.menu.spinner_items, menu)
+                setOnMenuItemClickListener { item ->
+                    binding.filterLayout.selectTime.setText(item.title)
+                    refreshList()
+
+                    true
+                }
+            }. show()
+        }
         var listTaskData = ArrayList<TaskData>()
         binding.filterLayout.ciCalender.setOnClickListener {
             setCalender()
@@ -63,7 +84,7 @@ class CompletedTaskListFragment : BaseFragment() {
                 if(it.isCompleted){
                     isCompleted="Completed"
                 }
-                    listTaskData.add(TaskData(it.task_name, ""+index, "", date[0], date[1], isCompleted))
+                    listTaskData.add(TaskData(it.task_name, ""+index, "", date[0], date[1], it.AssignedTo,isCompleted))
             }
 
 
@@ -104,7 +125,8 @@ class CompletedTaskListFragment : BaseFragment() {
                 // date to our edit text.
                 val dat = (dayOfMonth.toString() + "-" + (monthOfYear + 1) + "-" + year)
                 binding.filterLayout.selectedDate.setText(dat)
-                viewModel.getAllPantryTasksCompeted(dat, isAssigned = true, isCompleted = true)
+                refreshList()
+//                viewModel.getAllPantryTasksCompeted(dat, isAssigned = true, isCompleted = true)
 
             },
             // on below line we are passing year, month
@@ -116,5 +138,8 @@ class CompletedTaskListFragment : BaseFragment() {
         // at last we are calling show
         // to display our date picker dialog.
         datePickerDialog.show()
+    }
+    private fun refreshList(){
+     viewModel.getAllPantryTasksCompeted(binding.filterLayout.selectedDate.text.toString(),binding.filterLayout.selectTime.text.toString(), isAssigned = true, isCompleted = true)
     }
 }

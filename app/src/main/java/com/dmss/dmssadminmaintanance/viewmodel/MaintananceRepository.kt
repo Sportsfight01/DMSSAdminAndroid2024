@@ -3,6 +3,7 @@ package com.dmss.admin.db.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.dmss.dmssadminmaintanance.db.AssignTaskToPersonEntityData
+import com.dmss.dmssadminmaintanance.db.FemaleRestRoomTasks
 import com.dmss.dmssadminmaintanance.db.MaintainanceDao
 import com.dmss.dmssadminmaintanance.db.PantryEntityData
 import com.dmss.dmssadminmaintanance.db.PantryTasks
@@ -45,8 +46,8 @@ class MaintananceRepository(private val maintainanceDao: MaintainanceDao) {
     suspend fun updatePantryTasks(pantryEntityData: PantryTasks){
         maintainanceDao.updatePantryTasksData(pantryEntityData.task_name,pantryEntityData.created_date,pantryEntityData.isCompleted)
     }
-     fun getAllPantryTasksAssigned(date: String,isAssigned:Boolean,isCompleted:Boolean): List<PantryTasks> {
-         var res1=maintainanceDao.getAllPPantryTasksAssigned(date,isAssigned,isCompleted)
+     fun getAllPantryTasksAssigned(date: String,time:String,isAssigned:Boolean,isCompleted:Boolean): List<PantryTasks> {
+         var res1=maintainanceDao.getAllPPantryTasksAssigned(date,time,isAssigned,isCompleted)
          println("getAllPPantryTasks getAllPPantryTasks1 ::  "+res1)
 
       /*   var res=maintainanceDao.getAllPPantryTasks("12-08-2024")
@@ -61,16 +62,16 @@ class MaintananceRepository(private val maintainanceDao: MaintainanceDao) {
            println("getAllPPantryTasks::  "+res.value)*/
         return res1
     }
-    fun getAllPantryTasks(date: String,isAssigned:Boolean): List<PantryTasks> {
-        var res1=maintainanceDao.getAllPPantryTasks1(date,isAssigned)
+    fun getAllPantryTasks(date: String,time: String,isAssigned:Boolean): List<PantryTasks> {
+        var res1=maintainanceDao.getAllPPantryTasks1(date,time,isAssigned)
         println("getAllPPantryTasks getAllPPantryTasks1 ::  "+res1)
 
         /*   var res=maintainanceDao.getAllPPantryTasks("12-08-2024")
            println("getAllPPantryTasks::  "+res.value)*/
         return res1
     }
-    fun getAllPantryTasksCompleted(date: String,isAssigned:Boolean,isCompleted:Boolean): List<PantryTasks> {
-        var res1=maintainanceDao.getAllPantryTasksCompleted(date,isAssigned,isCompleted)
+    fun getAllPantryTasksCompleted(date: String,time: String,isAssigned:Boolean,isCompleted:Boolean): List<PantryTasks> {
+        var res1=maintainanceDao.getAllPantryTasksCompleted(date,time,isAssigned,isCompleted)
         println("getAllPPantryTasks getAllPPantryTasks1 ::  "+res1)
 
         /*   var res=maintainanceDao.getAllPPantryTasks("12-08-2024")
@@ -137,6 +138,34 @@ class MaintananceRepository(private val maintainanceDao: MaintainanceDao) {
            println("getAllPPantryTasks::  "+res.value)*/
         return res1
     }
+    suspend fun insertFemaleREstrom(femaleRestRoomTasks: FemaleRestRoomTasks){
+        maintainanceDao.insertFemaleRestRoomTasksData(femaleRestRoomTasks)
+    }
+    suspend fun deleteFemaleRestRoomTasks(restRoomTasks: FemaleRestRoomTasks){
+        maintainanceDao.deleteFemaleRestRoomTasksData(restRoomTasks)
+    }
+    suspend fun deletedAssignTaskToPerson(assignTaskToPersonEntityData: AssignTaskToPersonEntityData){
+        maintainanceDao.deletedAssignTaskToPerson(assignTaskToPersonEntityData)
+    }
+    fun getFemaleRestRoomTask(date: String,time: String,isAssigned: Boolean,isCompleted: Boolean):List<FemaleRestRoomTasks>{
 
+        var res = maintainanceDao.getFemaleRestRoomTasksByDateTime(date,time,isAssigned,isCompleted)
 
+        return res
+    }
+    fun getFemaleRestRoomTaskByDate(date: String):List<FemaleRestRoomTasks>{
+
+        var res = maintainanceDao.getFemaleRestRoomTasksByDate(date)
+
+        return res
+    }
+    fun getFemaleRestRoomAssignedTask(date: String,time: String,isAssigned: Boolean):List<FemaleRestRoomTasks>{
+
+        var res = maintainanceDao.getFemaleRestRoomAssignedTask(date,time,isAssigned)
+
+        return res
+    }
+    suspend fun updateFemaleRestRoomTasksData(restRoomTasks: FemaleRestRoomTasks){
+        maintainanceDao.updateFemaleRestRoomTasksData(restRoomTasks.task_name,restRoomTasks.created_date,restRoomTasks.isCompleted)
+    }
 }

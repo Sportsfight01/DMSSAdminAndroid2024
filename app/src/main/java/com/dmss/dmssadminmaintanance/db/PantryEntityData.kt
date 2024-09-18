@@ -34,12 +34,15 @@ data class AssignTaskToPersonEntityData(
     )
   @Entity(tableName = Constants.pantry_tasks_table)
    data class PantryTasks(
-            val task_name:String="",
-            val created_date:String="",
-            val isAssigned:Boolean=false,
-            val isCompleted:Boolean= false,
-            @PrimaryKey(autoGenerate = true) val id: Int? = null
+      val task_name:String="",
+      val created_date:String="",
+      val created_time:String="",
+      var AssignedTo:String="",
+      val isAssigned:Boolean=false,
+      val isCompleted:Boolean= false,
+      @PrimaryKey(autoGenerate = true) val id: Int? = null
         )
+
 @Entity(tableName = "restroom_table")
 data class RestRoomEntityData(
     val Door:Boolean,
@@ -65,7 +68,17 @@ data class RestRoomTasks(
     val task_name:String="",
     val created_date:String="",
     val created_time:String="",
-    var isAssignedTo:String="",
+    var AssignedTo:String="",
+    val isAssigned:Boolean=false,
+    val isCompleted:Boolean= false,
+    @PrimaryKey(autoGenerate = true) val id: Int? = null
+)
+@Entity(tableName = Constants.female_restroom_tasks_table)
+data class FemaleRestRoomTasks(
+    val task_name:String="",
+    val created_date:String="",
+    val created_time:String="",
+    var AssignedTo:String="",
     val isAssigned:Boolean=false,
     val isCompleted:Boolean= false,
     @PrimaryKey(autoGenerate = true) val id: Int? = null

@@ -38,9 +38,10 @@ interface MaintainanceDao {
     }
 
 
+//    @Insert(onConflict = OnConflictStrategy.REPLACE)
+//    suspend fun insertPantryData(pantryEntityData: PantryTasks)
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPantryData(pantryEntityData: PantryTasks)
-
     @Delete
     suspend fun deletedPantryData(pantryEntityData: PantryTasks)
 
@@ -50,15 +51,15 @@ interface MaintainanceDao {
     @Query("SELECT * FROM pantry_tasks_table WHERE created_date=:arg0")
     fun getAllPPantryTasks(arg0: String): LiveData<List<PantryTasks>>
 
-    @Query("SELECT * FROM pantry_tasks_table WHERE created_date=:arg0 and isAssigned=:isAssigned and isCompleted=:isCompleted")
-    fun getAllPPantryTasksAssigned(arg0: String,isAssigned: Boolean,isCompleted: Boolean): List<PantryTasks>
+    @Query("SELECT * FROM pantry_tasks_table WHERE created_date=:date and created_time=:time and isAssigned=:isAssigned and isCompleted=:isCompleted")
+    fun getAllPPantryTasksAssigned(date: String,time: String,isAssigned: Boolean,isCompleted: Boolean): List<PantryTasks>
 
 
-    @Query("SELECT * FROM pantry_tasks_table WHERE created_date=:arg0 and isAssigned=:isAssigned and isCompleted=:isCompleted")
-    fun getAllPantryTasksCompleted(arg0: String,isAssigned: Boolean,isCompleted: Boolean): List<PantryTasks>
+    @Query("SELECT * FROM pantry_tasks_table WHERE created_date=:arg0 and created_time = :time  and isAssigned=:isAssigned and isCompleted=:isCompleted")
+    fun getAllPantryTasksCompleted(arg0: String,time: String,isAssigned: Boolean,isCompleted: Boolean): List<PantryTasks>
 
-    @Query("SELECT * FROM pantry_tasks_table WHERE created_date=:arg0 and isAssigned=:isAssigned")
-    fun getAllPPantryTasks1(arg0: String,isAssigned: Boolean): List<PantryTasks>
+    @Query("SELECT * FROM pantry_tasks_table WHERE created_date=:arg0 and created_time = :time and isAssigned=:isAssigned")
+    fun getAllPPantryTasks1(arg0: String,time: String,isAssigned: Boolean): List<PantryTasks>
 
     @Query("SELECT * FROM pantry_tasks_table WHERE created_date=:arg0")
     fun getAllPPantryTasksByDate(arg0: String): List<PantryTasks>
@@ -89,7 +90,7 @@ interface MaintainanceDao {
     @Delete
     suspend fun deletedRestRoomTasksData(restRoomTasks: RestRoomTasks)
 
-    @Query("UPDATE restroom_tasks_table set   isCompleted = :isCompleted where created_date = :createDate and task_name= :taskName")
+    @Query("UPDATE restroom_tasks_table set  isCompleted = :isCompleted where created_date = :createDate and task_name= :taskName")
     suspend fun updateRestRoomTasksData(taskName: String?, createDate: String?, isCompleted: Boolean?)
 
     @Query("UPDATE restroom_tasks_table set isCompleted = :isCompleted and isAssigned= :isAssined where created_date = :createDate")
@@ -112,4 +113,21 @@ interface MaintainanceDao {
     fun getAllRestRoomTasksByDateWise(arg0: String): List<RestRoomTasks>
 
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertFemaleRestRoomTasksData(restRoomTasks: FemaleRestRoomTasks)
+
+    @Query("SELECT * FROM female_restroom_tasks_table WHERE created_date=:date and  created_time=:time and isAssigned=:isAssigned and isCompleted=:isCompleted")
+    fun getFemaleRestRoomTasksByDateTime(date: String,time: String,isAssigned: Boolean,isCompleted: Boolean): List<FemaleRestRoomTasks>
+
+    @Query("SELECT * FROM female_restroom_tasks_table WHERE created_date=:date and  created_time=:time and isAssigned=:isAssigned")
+    fun getFemaleRestRoomAssignedTask(date: String,time: String,isAssigned: Boolean): List<FemaleRestRoomTasks>
+
+    @Delete
+    suspend fun deleteFemaleRestRoomTasksData(restRoomTasks: FemaleRestRoomTasks)
+
+    @Query("UPDATE female_restroom_tasks_table set isCompleted = :isCompleted where created_date = :createDate and task_name= :taskName")
+    suspend fun updateFemaleRestRoomTasksData(taskName: String?, createDate: String?, isCompleted: Boolean?)
+
+    @Query("SELECT * FROM female_restroom_tasks_table WHERE created_date=:date")
+    fun getFemaleRestRoomTasksByDate(date: String): List<FemaleRestRoomTasks>
 }

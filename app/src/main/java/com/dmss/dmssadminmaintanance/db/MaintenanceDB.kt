@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(entities = arrayOf(AssignTaskToPersonEntityData::class,PantryEntityData::class,PantryTasks::class,
-RestRoomEntityData::class,RestRoomTasks::class), version = 1, exportSchema = false)
+RestRoomEntityData::class,RestRoomTasks::class,FemaleRestRoomTasks::class), version = 1, exportSchema = false)
 abstract class MaintenanceDB:RoomDatabase() {
 
     abstract fun getMaintenanceDao():MaintainanceDao

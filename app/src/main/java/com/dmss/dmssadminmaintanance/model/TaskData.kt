@@ -8,6 +8,8 @@ data class TaskData(val category:String,
                     val image:String,
                     val date:String,
                     val month:String,
+                    val assignTo:String,
+
                     val status:String) : Parcelable
 @Parcelize
 data class SuppliesData(val itemName:String,

@@ -6,12 +6,14 @@ import android.provider.ContactsContract.Contacts
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dmss.admin.db.viewmodel.MaintainanceViewModel
 import com.dmss.dmssadminmaintanance.BaseFragment
+import com.dmss.dmssadminmaintanance.R
 import com.dmss.dmssadminmaintanance.databinding.FragmentPendingTaskListBinding
 import com.dmss.dmssadminmaintanance.db.PantryTasks
 import com.dmss.dmssadminmaintanance.model.CheckBoxModel
@@ -41,6 +43,7 @@ class PendingTaskListFragment : BaseFragment() {
     private lateinit var viewModel: MaintainanceViewModel
     var listArr: MutableList<CheckBoxModel> = ArrayList<CheckBoxModel>()
     var selectedItems: MutableList<CheckBoxModel> = ArrayList<CheckBoxModel>()
+    lateinit var checkBoxRecycleviewAdapter :PantryTasksAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,18 +64,41 @@ class PendingTaskListFragment : BaseFragment() {
     }
     private fun initView() {
         var listTaskData = ArrayList<TaskData>()
+        binding.filterLayout.submit.setText(getString(R.string.complete))
+
+        binding.rvPantry.layoutManager = LinearLayoutManager(activity)
+        checkBoxRecycleviewAdapter = PantryTasksAdapter(getString(R.string.pantry)) { it->
+            selectedItems= it as ArrayList<CheckBoxModel>
+        }
+        binding.rvPantry.adapter = checkBoxRecycleviewAdapter
+        binding.filterLayout.llTimer.visibility=View.VISIBLE
+        var currentHour=Utils.getCurrentHour()
+        binding.filterLayout.selectTime.setText(currentHour)
         binding.filterLayout.ciCalender.setOnClickListener {
             setCalender()
         }
+        binding.filterLayout.selectTime.setOnClickListener {
+            PopupMenu(requireActivity(), binding.filterLayout.selectTime).apply {
+                menuInflater.inflate(R.menu.spinner_items, menu)
+                setOnMenuItemClickListener { item ->
+                    binding.filterLayout.selectTime.setText(item.title)
+                    refreshList()
 
+                    true
+                }
+            }. show()
+        }
         binding.filterLayout.selectedDate.text = Utils.getCurrentDate()
         viewModel = ViewModelProvider(this)[MaintainanceViewModel::class.java]
-        viewModel.getAllPantryTasksAssigned(binding.filterLayout.selectedDate.text.toString(),
+      /*  viewModel.getAllPantryTasksAssigned(binding.filterLayout.selectedDate.text.toString(),binding.filterLayout.selectTime.text.toString(),
             isAssigned = true,
             isCompleted = false
         )
 
+*/
 //        viewModel.AllPantryTaksBydata("19-08-2024")
+        refreshList()
+
         viewModel.getAllPantryPendingTasksByDate().observe(viewLifecycleOwner){
             listTaskData.clear()
             it.forEachIndexed { index, it ->
@@ -81,46 +107,53 @@ class PendingTaskListFragment : BaseFragment() {
                 if(it.isCompleted){
                     isCompleted="Completed"
                 }
-                listTaskData.add(TaskData(it.task_name, ""+index, "", date[0], date[1], isCompleted))
-                listArr.add(CheckBoxModel(0, false, it.task_name,it.created_date,it.id!!))
+                listTaskData.add(TaskData(it.task_name, ""+index, "", date[0], date[1],it.AssignedTo ,isCompleted))
+                listArr.add(CheckBoxModel(0, false, it.task_name,it.created_date,it.AssignedTo,it.id!!))
             }
 
 
-            binding.rvPantry.layoutManager = LinearLayoutManager(activity)
-            var checkBoxRecycleviewAdapter = PantryTasksAdapter {it->
-                selectedItems= it as ArrayList<CheckBoxModel>
-            }
-            binding.rvPantry.adapter = checkBoxRecycleviewAdapter
+
             checkBoxRecycleviewAdapter.loadItems(listArr)
 
             binding.filterLayout.submit.setOnClickListener {
-                var selectedDate = binding.filterLayout.selectedDate.text.toString()
-                var dataList= ArrayList<PantryTasks>()
-                var lastIndex= selectedItems.size-1
-                selectedItems.forEachIndexed { index, checkBoxModel ->
-                    val pantryTask= PantryTasks(checkBoxModel.text,selectedDate, isAssigned = true, isCompleted = true,checkBoxModel.id)
-                    viewModel.updatePantryTasks(pantryTask)
-                    dataList.add(element = pantryTask)
-                    if(index==lastIndex){
-                        Thread.sleep(1000)
-                        println("lastIndex:: "+lastIndex+"  index:: "+index)
-
-                        listArr.clear()
-                        checkBoxRecycleviewAdapter.loadItems(listArr)
-                        viewModel.getAllPantryTasksAssigned(binding.filterLayout.selectedDate.text.toString(),
-                            isAssigned = true,
-                            isCompleted = false
-                        )
-                        Toast.makeText(context,"Tasks Completed Success..", Toast.LENGTH_SHORT).show()
-
-                    }
-                }
+             Utils.confirmationAlertAlertDialog(requireActivity(),"Are you sure! Do you want to complete task ?"){it1->
+                 if(it1){
+                 updateData()
+                     }
+             }
             }
-
-
         }
 
+    }
+    fun updateData(){
+        var selectedDate = binding.filterLayout.selectedDate.text.toString()
+        var dataList= ArrayList<PantryTasks>()
+        var lastIndex= selectedItems.size-1
+        selectedItems.forEachIndexed { index, checkBoxModel ->
+            val pantryTask= PantryTasks(checkBoxModel.text,binding.filterLayout.selectedDate.text.toString(),binding.filterLayout.selectTime.text.toString(),"", isAssigned = true, isCompleted = true,checkBoxModel.id)
+            viewModel.updatePantryTasks(pantryTask)
+            dataList.add(element = pantryTask)
+            if(index==lastIndex){
+                Thread.sleep(1000)
+                println("lastIndex:: "+lastIndex+"  index:: "+index)
 
+                listArr.clear()
+                checkBoxRecycleviewAdapter.loadItems(listArr)
+                viewModel.getAllPantryTasksAssigned(binding.filterLayout.selectedDate.text.toString(),
+                    binding.filterLayout.selectTime.text.toString(),
+                    isAssigned = true,
+                    isCompleted = false
+                )
+                Toast.makeText(context,"Tasks Completed Success..", Toast.LENGTH_SHORT).show()
+
+            }
+        }
+    }
+    private fun refreshList(){
+        listArr.clear()
+        checkBoxRecycleviewAdapter.loadItems(listArr)
+
+        viewModel.getAllPantryTasksAssigned(binding.filterLayout.selectedDate.text.toString(),binding.filterLayout.selectTime.text.toString(),true,false)
     }
  /* fun navigateToStatusUpdate(selectedItem: TaskData) {
         findNavController().navigate(
@@ -147,7 +180,10 @@ class PendingTaskListFragment : BaseFragment() {
                 // date to our edit text.
                 val dat = (dayOfMonth.toString() + "-" + (monthOfYear + 1) + "-" + year)
                 binding.filterLayout.selectedDate.setText(dat)
-                viewModel.getAllPantryTasksAssigned(dat, isAssigned = true, isCompleted = false)
+                viewModel.getAllPantryTasksAssigned(dat,binding.filterLayout.selectTime.text.toString(), isAssigned = true, isCompleted = false)
+                listArr.clear()
+//                checkBoxRecycleviewAdapter.loadItems(listArr)
+
 
             },
             // on below line we are passing year, month

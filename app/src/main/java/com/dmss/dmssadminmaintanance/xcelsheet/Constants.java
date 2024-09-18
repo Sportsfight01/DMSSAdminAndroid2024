@@ -13,5 +13,7 @@ public class Constants {
     public static final String EXTENSION = ".xls";
     public static final String pantry_tasks_table="pantry_tasks_table";
     public static final String restroom_tasks_table="restroom_tasks_table";
+    public static final String female_restroom_tasks_table="female_restroom_tasks_table";
+
 }
 
