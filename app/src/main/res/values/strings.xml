@@ -25,6 +25,8 @@
     <string name="complete">Complete</string>
 
     <string name="comment">Comment</string>
+    <string name="no_assign_person">No assign person available. Do you want to add assign person ?</string>
+
     <string name="submit">Submit</string>
     <string name="upload_photo">Upload Photo</string>
     <string name="daily">Daily</string>

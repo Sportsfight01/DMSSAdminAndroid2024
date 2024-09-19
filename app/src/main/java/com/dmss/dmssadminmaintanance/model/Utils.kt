@@ -145,7 +145,7 @@ object Utils {
              Html.fromHtml("<font color=" + context.resources.getColor(R.color.black) + ">No</font>"),
              DialogInterface.OnClickListener {
                      dialog: DialogInterface, _: Int -> dialog.dismiss()
-                 callback.invoke(false)
+//                 callback.invoke(false)
 
                  dialog.dismiss()
              })
