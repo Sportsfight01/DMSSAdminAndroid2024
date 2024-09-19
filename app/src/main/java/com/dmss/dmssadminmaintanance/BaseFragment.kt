@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import com.dmss.dmssadminmaintanance.dashboard.DashboardFragment
 import com.dmss.dmssadminmaintanance.pantry.PantryHomeFragment
 import com.dmss.dmssadminmaintanance.pantry.RestRoomHomeFragment
+import com.dmss.dmssadminmaintanance.sidemenu.AssigningToPersonFragment
 
 open class BaseFragment : Fragment() {
 
@@ -30,6 +31,10 @@ open class BaseFragment : Fragment() {
             }
             is RestRoomHomeFragment ->{
                 (activity as MainActivity).initToolBarHeader(getString(R.string.rest_rooms))
+
+            }
+            is AssigningToPersonFragment ->{
+                (activity as MainActivity).initToolBarHeader(getString(R.string.assign))
 
             }
             else ->{

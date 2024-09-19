@@ -11,7 +11,11 @@ import android.widget.ArrayAdapter
 import android.widget.CheckedTextView
 import android.widget.PopupMenu
 import android.widget.Toast
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dmss.admin.db.viewmodel.MaintainanceViewModel
 import com.dmss.dmssadminmaintanance.BaseFragment
@@ -25,6 +29,7 @@ import com.dmss.dmssadminmaintanance.model.TaskData
 import com.dmss.dmssadminmaintanance.model.Utils
 import com.dmss.dmssadminmaintanance.pantry.adapter.CommanAdapter
 import com.dmss.dmssadminmaintanance.pantry.adapter.PantryTasksAdapter
+import com.dmss.dmssadminmaintanance.sidemenu.AssigningToPersonFragment
 import com.dmss.dmssadminmaintanance.xcelsheet.Constants
 import com.dmss.dmssadminmaintanance.xcelsheet.ExcelUtils
 import java.text.SimpleDateFormat
@@ -113,7 +118,7 @@ class PantryTasksListFragment : BaseFragment() {
             pantryListDataArr.clear()
             it.forEach {
                 if (!assigendList.contains(it) && it!="id")
-                        listArr.add(CheckBoxModel(0, false, it))
+                    listArr.add(CheckBoxModel(0, false, it))
 
             }
             println("coulumnNames11:: " + coulumnNames.size)
@@ -139,7 +144,14 @@ class PantryTasksListFragment : BaseFragment() {
 
         })
         binding.filterLayout.submit.setOnClickListener {
-            openAssignedPersonDialog(assigendToPersonList)
+            if(assigendToPersonList.size>0) {
+
+                openAssignedPersonDialog(assigendToPersonList)
+            }else{
+                Utils.confirmationAlertAlertDialog(requireActivity(),getString(R.string.no_assign_person)){
+                    navigateTo(R.id.assign_person_fragment)
+                }
+            }
         }
 
     }
@@ -176,9 +188,9 @@ class PantryTasksListFragment : BaseFragment() {
                 // date to our edit text.
                 val dat = (dayOfMonth.toString() + "-" + (monthOfYear + 1) + "-" + year)
                 binding.filterLayout.selectedDate.setText(dat)
-               /* viewModel.getAllPantryTasksbydate1(binding.filterLayout.selectedDate.text.toString(),true)
-                listArr.clear()
-                checkBoxRecycleviewAdapter.loadItems(listArr)*/
+                /* viewModel.getAllPantryTasksbydate1(binding.filterLayout.selectedDate.text.toString(),true)
+                 listArr.clear()
+                 checkBoxRecycleviewAdapter.loadItems(listArr)*/
 
 
                 refreshList()
@@ -251,5 +263,16 @@ class PantryTasksListFragment : BaseFragment() {
 
             }
         }
+    }
+    private fun navigateTo(resId: Int) {
+        var  navController = requireActivity().findNavController(R.id.nav_host_fragment_content_dashboard_new)
+
+        if (checkCurrentFragment(resId).not())
+            navController.navigate(resId)
+    }
+    private fun checkCurrentFragment(id : Int): Boolean{
+        val navController =
+            Navigation.findNavController(requireActivity(), R.id.nav_host_fragment_content_dashboard_new)
+        return navController.currentDestination?.id == id
     }
 }

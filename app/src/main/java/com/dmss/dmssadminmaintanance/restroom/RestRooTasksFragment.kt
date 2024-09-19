@@ -11,7 +11,11 @@ import android.view.ViewGroup
 import android.widget.CheckedTextView
 import android.widget.PopupMenu
 import android.widget.Toast
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dmss.admin.db.viewmodel.MaintainanceViewModel
 import com.dmss.dmssadminmaintanance.BaseFragment
@@ -25,6 +29,7 @@ import com.dmss.dmssadminmaintanance.model.CheckBoxModel
 import com.dmss.dmssadminmaintanance.model.Utils
 import com.dmss.dmssadminmaintanance.pantry.adapter.CommanAdapter
 import com.dmss.dmssadminmaintanance.pantry.adapter.PantryTasksAdapter
+import com.dmss.dmssadminmaintanance.sidemenu.AssigningToPersonFragment
 import java.util.Calendar
 
 // TODO: Rename parameter arguments, choose names that match
@@ -91,7 +96,7 @@ class RestRooTasksFragment : BaseFragment() {
                 refreshList()
             }
         }
-         checkBoxRecycleviewAdapter = PantryTasksAdapter(getString(R.string.rest_rooms)) { it ->
+        checkBoxRecycleviewAdapter = PantryTasksAdapter(getString(R.string.rest_rooms)) { it ->
             println("FilteredList:: " + it.size)
             selectedItems = it as ArrayList<CheckBoxModel>
 
@@ -110,7 +115,7 @@ class RestRooTasksFragment : BaseFragment() {
                 assigendList.add(it.task_name)
             }
 
-           viewModel.getAllRestroomColumns()
+            viewModel.getAllRestroomColumns()
 
         }
         viewModel.getFemaleRestroomTasksByDateTime().observe(viewLifecycleOwner){
@@ -155,13 +160,15 @@ class RestRooTasksFragment : BaseFragment() {
             /*   val formatter = SimpleDateFormat("yyyy-MM-dd")
                val date = Date()
                val current = formatter.format(date)*/
-
-            pantryListDataArr.clear()
-            felameListDataArr.clear()
-
-
-
-             openAssignedPersonDialog(assigendToPersonList)
+            if(assigendToPersonList.size>0) {
+                pantryListDataArr.clear()
+                felameListDataArr.clear()
+                openAssignedPersonDialog(assigendToPersonList)
+            }else{
+                Utils.confirmationAlertAlertDialog(requireActivity(),getString(R.string.no_assign_person)){
+                    navigateTo(R.id.assign_person_fragment)
+                }
+            }
 //       viewModel.allPantryTasksDataBydate?.observe(viewLifecycleOwner){
 //           println("List of pantryTaksEntityData:: $it")
 //       }
@@ -292,5 +299,16 @@ class RestRooTasksFragment : BaseFragment() {
                 binding.filterLayout.selectTime.text.toString(),
                 true)
         }
+    }
+    private fun navigateTo(resId: Int) {
+        var  navController = requireActivity().findNavController(R.id.nav_host_fragment_content_dashboard_new)
+
+        if (checkCurrentFragment(resId).not())
+            navController.navigate(resId)
+    }
+    private fun checkCurrentFragment(id : Int): Boolean{
+        val navController =
+            Navigation.findNavController(requireActivity(), R.id.nav_host_fragment_content_dashboard_new)
+        return navController.currentDestination?.id == id
     }
 }
