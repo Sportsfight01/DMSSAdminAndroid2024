@@ -108,4 +108,14 @@
             android:id="@+id/action_addNoteFragment_to_home_fragment1"
             app:destination="@id/fragment_dashboard" />
     </fragment>
+
+    <fragment
+        android:id="@+id/fragment_calculate_int"
+        android:name="com.dmss.dmssadminmaintanance.sidemenu.CalculateIntFragment"
+        android:label="DownloadExcelsFragment"
+        tools:layout="@layout/fragment_calculate_int" >
+        <action
+            android:id="@+id/action_addNoteFragment_to_home_fragment1"
+            app:destination="@id/fragment_dashboard" />
+    </fragment>
 </navigation>

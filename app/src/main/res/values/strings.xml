@@ -26,6 +26,8 @@
 
     <string name="comment">Comment</string>
     <string name="no_assign_person">No assign person available. Do you want to add assign person ?</string>
+    <string name="tasks_assigned_success">Tasks Assigned Success..</string>
+    <string name="please_select_at_least_one_item">Please Select At least One Item</string>
 
     <string name="submit">Submit</string>
     <string name="upload_photo">Upload Photo</string>
@@ -81,12 +83,12 @@
         <item>Female</item>
     </string-array>
     <string-array name="task_tables">
-    <item>Cabins</item>
-    <item>Games Room</item>
-    <item>Work Station</item>
-    <item>Pantry</item>
-    <item>Rest Rooms</item>
-    <item>General Area</item>
+        <item>Cabins</item>
+        <item>Games Room</item>
+        <item>Work Station</item>
+        <item>Pantry</item>
+        <item>Rest Rooms</item>
+        <item>General Area</item>
     </string-array>
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris

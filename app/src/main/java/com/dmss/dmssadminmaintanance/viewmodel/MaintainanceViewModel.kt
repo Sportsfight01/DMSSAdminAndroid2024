@@ -25,6 +25,9 @@ class MaintainanceViewModel(application: Application) : AndroidViewModel(applica
     val allPantryPendingTasksByDate=MutableLiveData<List<PantryTasks>>()
     val allPantryCompletedTasksByDate=MutableLiveData<List<PantryTasks>>()
     val allPantryTasksByDate=MutableLiveData<List<PantryTasks>>()
+    val allNotAssignedPantryTasksDataBydate=MutableLiveData<List<PantryTasks>>()
+    val allNotAssignedMaleRestRoomTasksDataBydate=MutableLiveData<List<RestRoomTasks>>()
+    val allNotAssignedFeMaleRestRoomTasksDataBydate=MutableLiveData<List<FemaleRestRoomTasks>>()
 
     val allRestRoomTasksDataBydate=MutableLiveData<List<RestRoomTasks>>()
 
@@ -77,6 +80,16 @@ class MaintainanceViewModel(application: Application) : AndroidViewModel(applica
     }
     fun getAllPantryCompletedTasksByDate(): LiveData<List<PantryTasks>> {
         return allPantryCompletedTasksByDate
+    }
+    fun getAllNotAssignedPantryTasksDataBydate(): LiveData<List<PantryTasks>> {
+        return allNotAssignedPantryTasksDataBydate
+    }
+    fun getAllNotAssignedFeMaleRestRoomTasksDataBydate(): LiveData<List<FemaleRestRoomTasks>> {
+        return allNotAssignedFeMaleRestRoomTasksDataBydate
+    }
+
+    fun getAllNotAssignedMaleRestRoomTasksDataBydate(): LiveData<List<RestRoomTasks>> {
+        return allNotAssignedMaleRestRoomTasksDataBydate
     }
     fun getAllRestRoomTasksByDate(): LiveData<List<RestRoomTasks>> {
         return allRestRoomTasksDataBydate
@@ -152,7 +165,7 @@ class MaintainanceViewModel(application: Application) : AndroidViewModel(applica
             val res=maintananceRepository.getAllPantryTasksByDate(date)
             var resLivdata=MutableLiveData<List<PantryTasks>>()
             resLivdata.postValue(res)
-            println("getAllPantryTasksbydate1:: "+res)
+//            println("getAllPantryTasksbydate1:: "+res)
             allPantryTasksByDate.postValue(res)
         }
         return allPantryTasksByDate
@@ -166,6 +179,36 @@ class MaintainanceViewModel(application: Application) : AndroidViewModel(applica
             allPantryTasksDataBydate.postValue(res)
         }
         return allPantryTasksDataBydate
+    }
+    fun getAllNotAssignPantryTasksbydateRequest(date:String,time: String,isAssigned:Boolean): LiveData<List<PantryTasks>>{
+        CoroutineScope(Dispatchers.IO+exceptionHandler).launch {
+            val res=maintananceRepository.getAllPantryNotAssignedTasks(date,time,isAssigned)
+            var resLivdata=MutableLiveData<List<PantryTasks>>()
+            resLivdata.postValue(res)
+            println("getAllPantryTasksbydate1:: "+res)
+            allNotAssignedPantryTasksDataBydate.postValue(res)
+        }
+        return allNotAssignedPantryTasksDataBydate
+    }
+    fun getAllNotAssignMaleRestRoomTasksbydateRequest(date:String,time: String,isAssigned:Boolean): LiveData<List<RestRoomTasks>>{
+        CoroutineScope(Dispatchers.IO+exceptionHandler).launch {
+            val res=maintananceRepository.getAllMaleRestRoomNotAssignedTasks(date,time,isAssigned)
+            var resLivdata=MutableLiveData<List<RestRoomTasks>>()
+            resLivdata.postValue(res)
+            println("getAllPantryTasksbydate1:: "+res)
+            allNotAssignedMaleRestRoomTasksDataBydate.postValue(res)
+        }
+        return allNotAssignedMaleRestRoomTasksDataBydate
+    }
+    fun getAllNotAssignFemaleRestRoomTasksbydateRequest(date:String,time: String,isAssigned:Boolean): LiveData<List<FemaleRestRoomTasks>>{
+        CoroutineScope(Dispatchers.IO+exceptionHandler).launch {
+            val res=maintananceRepository.getAllFeMaleRestRoomNotAssignedTasks(date,time,isAssigned)
+            var resLivdata=MutableLiveData<List<FemaleRestRoomTasks>>()
+            resLivdata.postValue(res)
+            println("getAllPantryTasksbydate1:: "+res)
+            allNotAssignedFeMaleRestRoomTasksDataBydate.postValue(res)
+        }
+        return allNotAssignedFeMaleRestRoomTasksDataBydate
     }
     fun getAllPantryTasksCompeted(date:String,time:String,isAssigned:Boolean,isCompleted:Boolean): LiveData<List<PantryTasks>>{
         CoroutineScope(Dispatchers.IO+exceptionHandler).launch {

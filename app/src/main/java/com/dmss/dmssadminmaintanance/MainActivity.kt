@@ -26,6 +26,7 @@ import androidx.navigation.fragment.findNavController
 import com.dmss.admin.db.viewmodel.MaintainanceViewModel
 import com.dmss.dmssadminmaintanance.databinding.LayoutMainBinding
 import com.dmss.dmssadminmaintanance.db.MaintenanceDB
+import com.dmss.dmssadminmaintanance.model.SharedPreferencesManager
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -68,6 +69,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initView() {
+        SharedPreferencesManager.init(this)
 
 
         checkPermission(applicationContext, this)
@@ -92,6 +94,10 @@ class MainActivity : AppCompatActivity() {
         binding.leftDrawerMenu.clAssign.setOnClickListener {
             toggleLeftDrawer()
             navigateTo(R.id.assign_person_fragment)
+        }
+        binding.leftDrawerMenu.clCsv.setOnClickListener {
+            toggleLeftDrawer()
+            navigateTo(R.id.fragment_calculate_int)
         }
 
 //        val appBarConfiguration = AppBarConfiguration(setOf(R.id.fragment_dashboard,

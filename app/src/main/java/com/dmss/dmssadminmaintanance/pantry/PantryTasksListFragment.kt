@@ -76,6 +76,8 @@ class PantryTasksListFragment : BaseFragment() {
 
         var currentHour=Utils.getCurrentHour()
         binding.filterLayout.selectTime.setText(currentHour)
+        binding.filterLayout.selectedDate.setText(Utils.getCurrentDate())
+
         binding.filterLayout.submit.setText(getString(R.string.assign))
 
         refreshList()
@@ -93,67 +95,72 @@ class PantryTasksListFragment : BaseFragment() {
         binding.filterLayout.llTimer.visibility=View.VISIBLE
 
         binding.filterLayout.ciCalender.setOnClickListener {
-            setCalender()
+           Utils. setCalender(requireActivity()){
+               binding.filterLayout.selectedDate.setText(it)
+               /* viewModel.getAllPantryTasksbydate1(binding.filterLayout.selectedDate.text.toString(),true)
+                listArr.clear()
+                checkBoxRecycleviewAdapter.loadItems(listArr)*/
+
+
+               refreshList()
+           }
         }
 
         binding.rvPantry.adapter = checkBoxRecycleviewAdapter
-        binding.filterLayout.selectedDate.setText(Utils.getCurrentDate())
 
-        viewModel.getAllPantryTasksbydate1(binding.filterLayout.selectedDate.text.toString(),binding.filterLayout.selectTime.text.toString(),true)
-        viewModel.getAllPantryTasksByDate().observe(viewLifecycleOwner){
-            println("listTaskData:: "+it.size)
-            assigendList.clear()
-            it.forEach {
+//        viewModel.getAllNotAssignPantryTasksbydateRequest(binding.filterLayout.selectedDate.text.toString(),binding.filterLayout.selectTime.text.toString(),true)
 
-                assigendList.add(it.task_name)
-            }
-
-            viewModel.getAllPantryColumnsRequest()
-
-        }
-        viewModel.getAllPantryColumnns().observe(viewLifecycleOwner) { it ->
-            println("listTaskData:: "+it.size)
-
-            coulumnNames = it
-            pantryListDataArr.clear()
-            it.forEach {
-                if (!assigendList.contains(it) && it!="id")
-                    listArr.add(CheckBoxModel(0, false, it))
-
-            }
-            println("coulumnNames11:: " + coulumnNames.size)
-
-            checkBoxRecycleviewAdapter.loadItems(listArr)
-
-
-        }
         binding.filterLayout.ctSelectAll.setOnClickListener(View.OnClickListener { v ->
-            (v as CheckedTextView).toggle()
-            listArr.clear()
-            println("coulumnNames:: " + coulumnNames.size)
-            coulumnNames.forEach {
-                if (it != "isCompleted" && it != "id" && it != "create_date")
-                    if (v.isChecked)
-                        listArr.add(CheckBoxModel(0, true, it))
-                    else
-                        listArr.add(CheckBoxModel(0, false, it))
+            selectedItems.clear()
+            var newAllSelectedItemsArr = ArrayList<CheckBoxModel>()
 
+            if(listArr.size>0) {
+                (v as CheckedTextView).toggle()
+//                listArr.clear()
+//                println("coulumnNames:: " + coulumnNames.size+"assigendList:: "+assigendList.size)
+                    println("listArr" + listArr.size)
+//                }
+                listArr.forEach {
+                    var isChecked =false
+                    if (v.isChecked) {
+                        isChecked = true
+                        selectedItems.add(CheckBoxModel(0, true, it.text))
+
+                    }
+                    var chr = CheckBoxModel().apply {
+                        position = 0
+                        checked = isChecked
+                        text = it.text
+                    }
+                    newAllSelectedItemsArr.add(chr)
+                }
+                println("newAllSelectedItemsArr:: "+newAllSelectedItemsArr)
+                listArr = newAllSelectedItemsArr
+                checkBoxRecycleviewAdapter.loadItems(listArr)
+            }else{
+//                Toast.makeText(requireActivity(),"No items",Toast.LENGTH_SHORT).show()
             }
-            println("listArr" + listArr.size)
-            checkBoxRecycleviewAdapter.loadItems(listArr)
 
         })
         binding.filterLayout.submit.setOnClickListener {
-            if(assigendToPersonList.size>0) {
+            if (selectedItems.size > 0) {
+                if (assigendToPersonList.size > 0) {
 
-                openAssignedPersonDialog(assigendToPersonList)
-            }else{
-                Utils.confirmationAlertAlertDialog(requireActivity(),getString(R.string.no_assign_person)){
-                    navigateTo(R.id.assign_person_fragment)
+                    openAssignedPersonDialog(assigendToPersonList)
+                } else {
+                    Utils.confirmationAlertAlertDialog(
+                        requireActivity(),
+                        getString(R.string.no_assign_person)
+                    ) {
+                        navigateTo(R.id.assign_person_fragment)
+                    }
                 }
             }
-        }
+            else{
+                Utils.showAlertDialog(requireActivity(),getString(R.string.please_select_at_least_one_item))
+            }
 
+        }
     }
     fun requestViewModel(){
         viewModel = ViewModelProvider(this)[MaintainanceViewModel::class.java]
@@ -168,49 +175,64 @@ class PantryTasksListFragment : BaseFragment() {
             }
 
         }
+        viewModel.getAllPantryTasksByDate().observe(viewLifecycleOwner){
+            println("listTaskData:: getAllPantryTasksByDate "+it.size)
+            if(it.isEmpty()) {
+
+                viewModel.getAllPantryColumnsRequest()
+            }
+
+        }
+        viewModel.getAllPantryColumnns().observe(viewLifecycleOwner) { it ->
+            println("listTaskData:: getAllPantryColumnns"+it.size)
+
+            coulumnNames = it
+            pantryListDataArr.clear()
+            it.forEach {
+                if (!assigendList.contains(it) && it!="id")
+                    listArr.add(CheckBoxModel(0, false, it))
+
+            }
+
+            checkBoxRecycleviewAdapter.loadItems(listArr)
+
+
+        }
+        viewModel.getAllNotAssignedPantryTasksDataBydate().observe(viewLifecycleOwner){
+            println("listTaskData:: getAllNotAssignedPantryTasksDataBydate "+it.size)
+            assigendList.clear()
+            if(it.isNotEmpty()) {
+                it.forEach {
+                    if ( it.task_name!="id") {
+
+                        listArr.add(CheckBoxModel(0, false, it.task_name))
+
+                        assigendList.add(it.task_name)
+                    }
+                }
+            }else{
+                viewModel.getAllPantryTasksbydate1(binding.filterLayout.selectedDate.text.toString(),binding.filterLayout.selectTime.text.toString(),true)
+
+//                viewModel.getAllPantryColumnsRequest()
+
+            }
+
+            checkBoxRecycleviewAdapter.loadItems(listArr)
+        }
     }
-    private fun setCalender(){
-        val c = Calendar.getInstance()
 
-        // on below line we are getting
-        // our day, month and year.
-        val year = c.get(Calendar.YEAR)
-        val month = c.get(Calendar.MONTH)
-        val day = c.get(Calendar.DAY_OF_MONTH)
-
-        // on below line we are creating a
-        // variable for date picker dialog.
-        val datePickerDialog = DatePickerDialog(
-            // on below line we are passing context.
-            requireActivity(),
-            { view, year, monthOfYear, dayOfMonth ->
-                // on below line we are setting
-                // date to our edit text.
-                val dat = (dayOfMonth.toString() + "-" + (monthOfYear + 1) + "-" + year)
-                binding.filterLayout.selectedDate.setText(dat)
-                /* viewModel.getAllPantryTasksbydate1(binding.filterLayout.selectedDate.text.toString(),true)
-                 listArr.clear()
-                 checkBoxRecycleviewAdapter.loadItems(listArr)*/
-
-
-                refreshList()
-            },
-            // on below line we are passing year, month
-            // and day for the selected date in our date picker.
-            year,
-            month,
-            day
-        )
-        // at last we are calling show
-        // to display our date picker dialog.
-        datePickerDialog.show()
-    }
     private fun refreshList(){
         listArr.clear()
-        checkBoxRecycleviewAdapter.loadItems(listArr)
+//        checkBoxRecycleviewAdapter.loadItems(listArr)
 
-        viewModel.getAllPantryTasksbydate1(binding.filterLayout.selectedDate.text.toString(),binding.filterLayout.selectTime.text.toString(),true)
-    }
+//        viewModel.getAllPantryTasksbydate1(binding.filterLayout.selectedDate.text.toString(),binding.filterLayout.selectTime.text.toString(),true)
+      var selectedTime = binding.filterLayout.selectTime.text.toString()
+      var selectedDate = binding.filterLayout.selectedDate.text.toString()
+      println("selectedTime:: "+selectedTime+"  selectedDate:: "+selectedDate)
+        viewModel.getAllNotAssignPantryTasksbydateRequest(selectedDate,selectedTime,false)
+
+
+  }
     private fun openAssignedPersonDialog( listArr: ArrayList<String>) {
 
         var layoutDailogListViewBinding = LayoutDailogListViewBinding.inflate(layoutInflater)
@@ -240,28 +262,65 @@ class PantryTasksListFragment : BaseFragment() {
         var selectedTime=binding.filterLayout.selectTime.text
 
         println("selectedDate:: "+selectedDate)
-        var selectedext = ""
-        coulumnNames.forEach {it1->
-            var isCompleted=false
-            selectedItems.forEach { it2->
-                selectedext = selectedext + "," + it2.text
-                if(it2.text==it1){
-                    isCompleted =true
+        if(assigendList.size==0) {
+            var selectedext = ""
+            coulumnNames.forEach { it1 ->
+                var isCompleted = false
+                selectedItems.forEach { it2 ->
+                    selectedext = selectedext + "," + it2.text
+                    if (it2.text == it1) {
+                        isCompleted = true
+                    }
+                }
+                pantryListDataArr.add(
+                    PantryTasks(
+                        it1,
+                        selectedDate.toString(),
+                        selectedTime.toString(),
+                        selectedItem,
+                        isCompleted,
+                        false
+                    )
+                )
+            }
+            val listlastSize = pantryListDataArr.lastIndex
+
+
+            pantryListDataArr.forEachIndexed { index, element ->
+//                println("element:: "+element)
+                    viewModel.insertPantryTasks(element)
+
+                if (index == listlastSize) {
+                    Thread.sleep(500)
+                    selectedItems.clear()
+                    refreshList()
+                    Toast.makeText(context, getString(R.string.tasks_assigned_success), Toast.LENGTH_SHORT).show()
+
                 }
             }
-            pantryListDataArr.add( PantryTasks(it1,selectedDate.toString(),selectedTime.toString(),selectedItem,isCompleted,false) )
-        }
-        val listlastSize=pantryListDataArr.lastIndex
+        }else {
+            if (assigendList.size > 0) {
+                val listlastSize = selectedItems.lastIndex
 
-        pantryListDataArr.forEachIndexed{ index, element ->
-//                println("element:: "+element)
-            viewModel.insertPantryTasks(element)
-            if(index==listlastSize){
-                Thread.sleep(500)
-                refreshList()
-                Toast.makeText(context,"Tasks Assigned Success..", Toast.LENGTH_SHORT).show()
+                selectedItems.forEachIndexed { index,it2 ->
+                val pantryTask = PantryTasks().apply {
+                    task_name = it2.text
+                    created_date = binding.filterLayout.selectedDate.text.toString()
+                    created_time = binding.filterLayout.selectTime.text.toString()
+                    AssignedTo = selectedItem
+                    isAssigned = true
+                    isCompleted = false
+                }
+                viewModel.updatePantryTasks(pantryTask)
+                    if (index == listlastSize) {
+                        Thread.sleep(500)
+                        selectedItems.clear()
+                        refreshList()
+                        Toast.makeText(context, getString(R.string.tasks_assigned_success), Toast.LENGTH_SHORT).show()
 
+                    }
             }
+        }
         }
     }
     private fun navigateTo(resId: Int) {

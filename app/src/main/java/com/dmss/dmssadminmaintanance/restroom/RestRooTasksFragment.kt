@@ -109,39 +109,10 @@ class RestRooTasksFragment : BaseFragment() {
         binding.rvPantry.adapter = checkBoxRecycleviewAdapter
         binding.filterLayout.selectedDate.text = Utils.getCurrentDate()
         refreshList()
-        viewModel.getAllRestRoomTasksByDate().observe(viewLifecycleOwner){
-            assigendList.clear()
-            it.forEach {
-                assigendList.add(it.task_name)
-            }
 
-            viewModel.getAllRestroomColumns()
-
-        }
-        viewModel.getFemaleRestroomTasksByDateTime().observe(viewLifecycleOwner){
-            assigendList.clear()
-            it.forEach {
-                assigendList.add(it.task_name)
-            }
-
-            viewModel.getAllRestroomColumns()
-
-        }
-        viewModel.getAllRestRoomColumnData().observe(viewLifecycleOwner) { it ->
-            coulumnNames = it
-            pantryListDataArr.clear()
-            it.forEach {
-                if (!assigendList.contains(it) && it!="id")
-                    listArr.add(CheckBoxModel(0, false, it))
-            }
-
-            checkBoxRecycleviewAdapter.loadItems(listArr)
-
-
-        }
         binding.filterLayout.ctSelectAll.setOnClickListener(View.OnClickListener { v ->
-            (v as CheckedTextView).toggle()
-            listArr.clear()
+//            (v as CheckedTextView).toggle()
+           /* listArr.clear()
             coulumnNames.forEach {
                 selectedItems.add(CheckBoxModel(0, true, it))
 
@@ -153,21 +124,56 @@ class RestRooTasksFragment : BaseFragment() {
 
             }
             println("listArr" + listArr.size)
-            checkBoxRecycleviewAdapter.loadItems(listArr)
+            checkBoxRecycleviewAdapter.loadItems(listArr)*/
+            selectedItems.clear()
+            var newAllSelectedItemsArr = ArrayList<CheckBoxModel>()
+
+            if(listArr.size>0) {
+                (v as CheckedTextView).toggle()
+//                listArr.clear()
+//                println("coulumnNames:: " + coulumnNames.size+"assigendList:: "+assigendList.size)
+                println("listArr" + listArr.size)
+//                }
+                listArr.forEach {
+                    var isChecked =false
+                    if (v.isChecked) {
+                        isChecked = true
+                        selectedItems.add(CheckBoxModel(0, true, it.text))
+
+                    }
+                    var chr = CheckBoxModel().apply {
+                        position = 0
+                        checked = isChecked
+                        text = it.text
+                    }
+                    newAllSelectedItemsArr.add(chr)
+                }
+                println("newAllSelectedItemsArr:: "+newAllSelectedItemsArr)
+                listArr = newAllSelectedItemsArr
+                checkBoxRecycleviewAdapter.loadItems(listArr)
+            }
 
         })
         binding.filterLayout.submit.setOnClickListener {
             /*   val formatter = SimpleDateFormat("yyyy-MM-dd")
                val date = Date()
                val current = formatter.format(date)*/
-            if(assigendToPersonList.size>0) {
-                pantryListDataArr.clear()
-                felameListDataArr.clear()
-                openAssignedPersonDialog(assigendToPersonList)
-            }else{
-                Utils.confirmationAlertAlertDialog(requireActivity(),getString(R.string.no_assign_person)){
-                    navigateTo(R.id.assign_person_fragment)
+            if(selectedItems.size>0) {
+                if (assigendToPersonList.size > 0) {
+                    pantryListDataArr.clear()
+                    felameListDataArr.clear()
+                    openAssignedPersonDialog(assigendToPersonList)
+                } else {
+                    Utils.confirmationAlertAlertDialog(
+                        requireActivity(),
+                        getString(R.string.no_assign_person)
+                    ) {
+                        navigateTo(R.id.assign_person_fragment)
+                    }
                 }
+            }else{
+                Utils.showAlertDialog(requireActivity(),getString(R.string.please_select_at_least_one_item))
+
             }
 //       viewModel.allPantryTasksDataBydate?.observe(viewLifecycleOwner){
 //           println("List of pantryTaksEntityData:: $it")
@@ -189,7 +195,7 @@ class RestRooTasksFragment : BaseFragment() {
         layoutDailogListViewBinding.listView.adapter = CommanAdapter(requireActivity(), listArr)
         layoutDailogListViewBinding.listView.setOnItemClickListener { parent, view, position, id ->
 //          Utils.showProgressDialog(requireActivity())
-            var selectedext = ""
+          /*  var selectedext = ""
             coulumnNames.forEach {it1->
                 var isCompleted=false
                 selectedItems.forEach { it2->
@@ -221,11 +227,11 @@ class RestRooTasksFragment : BaseFragment() {
                         )
                     )
                 }
-            }
+            }*/
             var selectedItem=  listArr[position]
             Utils.confirmationAlertAlertDialog(requireActivity(),"Are you sure! Do you want to assign task to $selectedItem ?"){
                 if(it){
-                    updateData()
+                    updateData(selectedItem)
                 }
             }
 
@@ -236,26 +242,82 @@ class RestRooTasksFragment : BaseFragment() {
         }
         alertDialog.show()
     }
-    fun updateData(){
-        val listlastSize=pantryListDataArr.lastIndex
-        val femalelastSize=felameListDataArr.lastIndex
-        if(pantryListDataArr.size>0) {
-            pantryListDataArr.forEachIndexed { index, element ->
-//                println("element:: "+element)
-                viewModel.insertRestRoomTasks(element)
+    fun updateData(selectedItem:String){
+        var selectedDate=binding.filterLayout.selectedDate.text
+        var selectedTime=binding.filterLayout.selectTime.text
+        val listlastSize = pantryListDataArr.lastIndex
+        val femalelastSize = felameListDataArr.lastIndex
+        if(Utils.selectedGender==getString(R.string.male)) {
 
-                if (index == listlastSize) {
+            if (assigendList.size== 0) {
+                var selectedext = ""
+
+                coulumnNames.forEach { it1 ->
+                    var isCompleted = false
+                    selectedItems.forEach { it2 ->
+                        selectedext = selectedext + "," + it2.text
+                        if (it2.text == it1) {
+                            isCompleted = true
+                        }
+                    }
+                    pantryListDataArr.add(
+                        RestRoomTasks(
+                            it1,
+                            selectedDate.toString(),
+                            selectedTime.toString(),
+                            selectedItem,
+                            isCompleted,
+                            false
+                        )
+                    )
+                }
+                val listlastSize = pantryListDataArr.lastIndex
+
+                pantryListDataArr.forEachIndexed { index, element ->
+//                println("element:: "+element)
+                    println("insertRestRoomTasks:: "+element)
+
+                    viewModel.insertRestRoomTasks(element)
+
+                    if (index == listlastSize) {
 //                    Utils.dismissProgressDialog()
 
-                    Thread.sleep(500)
-                    refreshList()
-                    Toast.makeText(context, "Tasks Assigned Success..", Toast.LENGTH_SHORT)
-                        .show()
+                        Thread.sleep(500)
+                        refreshList()
+                        selectedItems.clear()
+                        Toast.makeText(context, "Tasks Assigned Success..", Toast.LENGTH_SHORT)
+                            .show()
 
+                    }
+                }
+            }else{
+                if (assigendList.size > 0) {
+                    val listlastSize = selectedItems.lastIndex
+
+                    selectedItems.forEachIndexed { index,it2 ->
+                        val restRoomTasks = RestRoomTasks().apply {
+                            task_name = it2.text
+                            created_date = binding.filterLayout.selectedDate.text.toString()
+                            created_time = binding.filterLayout.selectTime.text.toString()
+                            AssignedTo = selectedItem
+                            isAssigned = true
+                            isCompleted = false
+                        }
+                        println("updateRestRoomTasks:: "+restRoomTasks)
+                        viewModel.updateRestRoomTasks(restRoomTasks)
+                        if (index == listlastSize) {
+                            Thread.sleep(500)
+                            refreshList()
+                            selectedItems.clear()
+                            Toast.makeText(context, getString(R.string.tasks_assigned_success), Toast.LENGTH_SHORT).show()
+
+                        }
+                    }
                 }
             }
-        }else{
-            felameListDataArr.forEachIndexed { index, element ->
+        }
+        else{
+           /* felameListDataArr.forEachIndexed { index, element ->
                 println("element:: "+element)
                 viewModel.insertFemaleRestRoomTasks(element)
 
@@ -268,6 +330,72 @@ class RestRooTasksFragment : BaseFragment() {
                     Toast.makeText(context, "Tasks Assigned Success..", Toast.LENGTH_SHORT)
                         .show()
 
+                }
+            }*/
+
+
+            if (assigendList.size== 0) {
+                var selectedext = ""
+
+                coulumnNames.forEach { it1 ->
+                    var isCompleted = false
+                    selectedItems.forEach { it2 ->
+                        selectedext = selectedext + "," + it2.text
+                        if (it2.text == it1) {
+                            isCompleted = true
+                        }
+                    }
+                    felameListDataArr.add(
+                        FemaleRestRoomTasks(
+                            it1,
+                            selectedDate.toString(),
+                            selectedTime.toString(),
+                            selectedItem,
+                            isCompleted,
+                            false
+                        )
+                    )
+                }
+                val listlastSize = felameListDataArr.lastIndex
+
+                felameListDataArr.forEachIndexed { index, element ->
+//                println("element:: "+element)
+                    println("insertRestRoomTasks:: "+element)
+
+                    viewModel.insertFemaleRestRoomTasks(element)
+
+                    if (index == listlastSize) {
+//                    Utils.dismissProgressDialog()
+
+                        Thread.sleep(500)
+                        refreshList()
+                        Toast.makeText(context, "Tasks Assigned Success..", Toast.LENGTH_SHORT)
+                            .show()
+
+                    }
+                }
+            }else{
+                if (assigendList.size > 0) {
+                    val listlastSize = selectedItems.lastIndex
+
+                    selectedItems.forEachIndexed { index,it2 ->
+                        val restRoomTasks = FemaleRestRoomTasks().apply {
+                            task_name = it2.text
+                            created_date = binding.filterLayout.selectedDate.text.toString()
+                            created_time = binding.filterLayout.selectTime.text.toString()
+                            AssignedTo = selectedItem
+                            isAssigned = true
+                            isCompleted = false
+                        }
+                        println("updateRestRoomTasks:: "+restRoomTasks)
+                        viewModel.updateFemaleRestRoomTasks(restRoomTasks)
+                        if (index == listlastSize) {
+                            Thread.sleep(500)
+                            refreshList()
+                            Toast.makeText(context, getString(R.string.tasks_assigned_success), Toast.LENGTH_SHORT).show()
+
+                        }
+                    }
                 }
             }
         }
@@ -284,20 +412,102 @@ class RestRooTasksFragment : BaseFragment() {
             }
 
         }
+        viewModel.getAllNotAssignedMaleRestRoomTasksDataBydate().observe(viewLifecycleOwner){
+            println("listTaskData:: getAllNotAssignedPantryTasksDataBydate "+it.size)
+            assigendList.clear()
+            if(it.isNotEmpty()) {
+                it.forEach {
+                    if ( it.task_name!="id") {
+
+                        listArr.add(CheckBoxModel(0, false, it.task_name))
+
+                        assigendList.add(it.task_name)
+                    }
+                }
+            }else{
+                viewModel.getAllRestRoomTasks(binding.filterLayout.selectedDate.text.toString(),binding.filterLayout.selectTime.text.toString(),true)
+
+//                viewModel.getAllPantryColumnsRequest()
+
+            }
+
+            checkBoxRecycleviewAdapter.loadItems(listArr)
+        }
+        viewModel.getAllNotAssignedFeMaleRestRoomTasksDataBydate().observe(viewLifecycleOwner){
+            println("listTaskData:: getAllNotAssignedPantryTasksDataBydate "+it.size)
+            assigendList.clear()
+            if(it.isNotEmpty()) {
+                it.forEach {
+                    if ( it.task_name!="id") {
+
+                        listArr.add(CheckBoxModel(0, false, it.task_name))
+
+                        assigendList.add(it.task_name)
+                    }
+                }
+            }else{
+                viewModel.sendRequestToFemaleRestRoomAssignedTasks(binding.filterLayout.selectedDate.text.toString(),binding.filterLayout.selectTime.text.toString(),true)
+
+//                viewModel.getAllPantryColumnsRequest()
+
+            }
+
+            checkBoxRecycleviewAdapter.loadItems(listArr)
+        }
+        viewModel.getAllRestRoomTasksByDate().observe(viewLifecycleOwner){
+          /*  assigendList.clear()
+            it.forEach {
+                assigendList.add(it.task_name)
+            }
+
+            viewModel.getAllRestroomColumns()*/
+            if(it.isEmpty()) {
+
+                viewModel.getAllRestroomColumns()
+            }
+
+        }
+        viewModel.getFemaleRestroomTasksByDateTime().observe(viewLifecycleOwner){
+            assigendList.clear()
+            it.forEach {
+                assigendList.add(it.task_name)
+            }
+
+            viewModel.getAllRestroomColumns()
+
+        }
+        viewModel.getAllRestRoomColumnData().observe(viewLifecycleOwner) { it ->
+            coulumnNames = it
+            pantryListDataArr.clear()
+            it.forEach {
+                if (!assigendList.contains(it) && it!="id")
+                    listArr.add(CheckBoxModel(0, false, it))
+            }
+
+            checkBoxRecycleviewAdapter.loadItems(listArr)
+
+
+        }
     }
     private fun refreshList(){
         listArr.clear()
         checkBoxRecycleviewAdapter.loadItems(listArr)
+        var selectedTime = binding.filterLayout.selectTime.text.toString()
+        var selectedDate = binding.filterLayout.selectedDate.text.toString()
         if(Utils.selectedGender==getString(R.string.male)) {
-            viewModel.getAllRestRoomTasks(
+         /*   viewModel.getAllRestRoomTasks(
                 binding.filterLayout.selectedDate.text.toString(),
                 binding.filterLayout.selectTime.text.toString(),
                 true
-            )
+            )*/
+            viewModel.getAllNotAssignMaleRestRoomTasksbydateRequest(selectedDate,selectedTime,false)
+
         }else{
-            viewModel.sendRequestToFemaleRestRoomAssignedTasks( binding.filterLayout.selectedDate.text.toString(),
-                binding.filterLayout.selectTime.text.toString(),
-                true)
+            viewModel.getAllNotAssignFemaleRestRoomTasksbydateRequest(selectedDate,selectedTime,false)
+
+            /* viewModel.sendRequestToFemaleRestRoomAssignedTasks( binding.filterLayout.selectedDate.text.toString(),
+                 binding.filterLayout.selectTime.text.toString(),
+                 true)*/
         }
     }
     private fun navigateTo(resId: Int) {

@@ -1,5 +1,6 @@
 package com.dmss.dmssadminmaintanance.sidemenu
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.content.DialogInterface
@@ -8,6 +9,7 @@ import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import com.dmss.admin.db.viewmodel.MaintainanceViewModel
 import com.dmss.dmssadminmaintanance.BaseFragment
@@ -15,11 +17,14 @@ import com.dmss.dmssadminmaintanance.R
 import com.dmss.dmssadminmaintanance.databinding.FragmentDownloadExcelsBinding
 import com.dmss.dmssadminmaintanance.databinding.LayoutDailogListViewBinding
 import com.dmss.dmssadminmaintanance.db.FemaleRestRoomTasks
+import com.dmss.dmssadminmaintanance.db.PantryTasks
 import com.dmss.dmssadminmaintanance.db.RestRoomTasks
+import com.dmss.dmssadminmaintanance.model.SharedPreferencesManager
 import com.dmss.dmssadminmaintanance.model.Utils
 import com.dmss.dmssadminmaintanance.pantry.adapter.CommanAdapter
 import com.dmss.dmssadminmaintanance.xcelsheet.Constants
 import com.dmss.dmssadminmaintanance.xcelsheet.ExcelUtils
+import java.text.SimpleDateFormat
 import java.util.Calendar
 
 /**
@@ -67,6 +72,8 @@ class DownloadExcelsFragment : BaseFragment() {
         tasksList = resources.getStringArray(R.array.task_tables).toList() as ArrayList<String>
 
         listOfTimingsColumns = resources.getStringArray(R.array.timings).toList() as ArrayList<String>
+        binding.etSelectDateInput.setText(Utils.getCurrentDate())
+//        binding.etSelectTaskInput.setText(getString(R.string.pantry))
 
         binding.etSelectTaskInput.setOnClickListener {
             openDialog(getString(R.string.select_task),tasksList)
@@ -83,11 +90,17 @@ class DownloadExcelsFragment : BaseFragment() {
             var selectedTask = binding.etSelectTaskInput.text.toString()
 //            var selectedTable = getColumName(selectedTask)
             println("selectedTask::"+selectedTask)
-            when(selectedTask){
-                getString(R.string.pantry) ->  viewModel.getAllPantryTasksbydate(selectedDate)
-                getString(R.string.rest_rooms) -> requestToRestRoomData()
-            }
+            if( selectedDate==""){
+                   Toast.makeText(requireActivity(),"Please select date",Toast.LENGTH_SHORT).show()
+            }else if(selectedTask==""){
+                Toast.makeText(requireActivity(),"Please select task",Toast.LENGTH_SHORT).show()
 
+            }else {
+                when (selectedTask) {
+                    getString(R.string.pantry) -> viewModel.getAllPantryTasksbydate(selectedDate)
+                    getString(R.string.rest_rooms) -> requestToRestRoomData()
+                }
+            }
         }
     }
     fun requestToRestRoomData(){
@@ -102,7 +115,7 @@ class DownloadExcelsFragment : BaseFragment() {
     }
     private fun Observers(){
         viewModel.getAllPantryTasksByDateWise().observe(viewLifecycleOwner){
-
+            listOfPantryColumns.clear()
             println("getAllPantryTasksByDateWise:: "+it)
        /*   var isExcelGenerated= ExcelUtils.exportPantryDataIntoWorkbook(
               context,
@@ -111,26 +124,32 @@ class DownloadExcelsFragment : BaseFragment() {
               it
           )*/
             var  restRoomTasks= it.groupBy { it.created_time }
-
-            var isExcelGenerated= ExcelUtils.exportPantryDataIntoWorkbook(
-                context,
-                Constants.PANTRY_EXCEL_FILE_NAME + "($selectedDate)" + Constants.EXTENSION,
-                selectedDate, restRoomTasks, listOfPantryColumns , listOfTimingsColumns
-            )
-
-            if(isExcelGenerated){
-                Utils.showAlertDialog(requireActivity(),"Excel Download Successful")
-            }else{
-                Utils.showAlertDialog(requireActivity(),"Unable to Download Excel. Please try again..")
-
+            var secondObject:Map<String,Any> = HashMap<String,Any>()
+            if(restRoomTasks!=null &&restRoomTasks.size>0){
+               var pantryFirstElement:List<PantryTasks> = restRoomTasks.values.toList()[0]
+                listOfPantryColumns.add("Assign To")
+               pantryFirstElement.forEach {
+//                   if(it.task_name!="id") {
+                       listOfPantryColumns.add(it.task_name)
+//                   }
+               }
             }
+            var fileName=Constants.PANTRY_EXCEL_FILE_NAME +"($selectedDate)"
+            val existingStringInShared=SharedPreferencesManager.getString(selectedDate+"_"+getString(R.string.pantry),"")
+            if(existingStringInShared!=""){
+                fileName = existingStringInShared
+            }
+            println("listOfPantryColumns:: "+listOfPantryColumns.size)
+
+            downloadExcel(fileName,restRoomTasks,secondObject,getString(R.string.pantry))
+
         }
         viewModel.getAllRestroomColumns().observe(viewLifecycleOwner) { it ->
             listOfRestRoomColumns = it as ArrayList<String>
         }
-        viewModel.getAllPantryColumnsRequest().observe(viewLifecycleOwner) { it ->
+        /*viewModel.getAllPantryColumnsRequest().observe(viewLifecycleOwner) { it ->
             listOfPantryColumns = it as ArrayList<String>
-        }
+        }*/
         viewModel.getAllRestRoomTasksByDateWise().observe(viewLifecycleOwner){
             maleRestRoomTasks = it as ArrayList<RestRoomTasks>
            /* it.forEach {it1->
@@ -148,20 +167,56 @@ class DownloadExcelsFragment : BaseFragment() {
             var restRoomTasks= maleRestRoomTasks.groupBy { it.created_time }
             var femaleRestRoomTasks= femaleRestRoomTasksmaleRestRoomTasks.groupBy { it.created_time }
 
-            var isExcelGenerated= ExcelUtils.exportRestRoomDataIntoWorkbook(
+           /* var isExcelGenerated= ExcelUtils.exportRestRoomDataIntoWorkbook(
                 context,
                 Constants.RESTROOM_EXCEL_FILE_NAME + "($selectedDate)5656" + Constants.EXTENSION,
                 selectedDate, restRoomTasks,femaleRestRoomTasks, listOfRestRoomColumns, listOfTimingsColumns
-            )
+            )*/
 //            var isExcelGenerated=  ExcelUtils.exportPantryDataIntoWorkbook(context, Constants.PANTRY_EXCEL_FILE_NAME+selectedDate+Constants.EXTENSION,selectedDate,it)
 
-            if(isExcelGenerated){
+          /*  if(isExcelGenerated){
                 Utils.showAlertDialog(requireActivity(), "Excel Download Successful")
             }else{
                 Utils.showAlertDialog(requireActivity(), "Excel Download Successful")
 
+            }*/
+            if(restRoomTasks!=null &&restRoomTasks.size>0){
+                var restroomFirstElement:List<RestRoomTasks> = restRoomTasks.values.toList()[0]
+                listOfPantryColumns.add("Assign To")
+                restroomFirstElement.forEach {
+//                   if(it.task_name!="id") {
+                    listOfPantryColumns.add(it.task_name)
+//                   }
+                }
             }
+
+        var fileName=Constants.RESTROOM_EXCEL_FILE_NAME +"($selectedDate)"
+        val existingStringInShared=SharedPreferencesManager.getString(selectedDate+"_"+getString(R.string.rest_rooms),"")
+        if(existingStringInShared!=""){
+            fileName = existingStringInShared
         }
+        println("listOfPantryColumns:: "+listOfPantryColumns.size)
+
+        downloadExcel(fileName,restRoomTasks,femaleRestRoomTasks,getString(R.string.rest_rooms))
+        }
+    }
+    @SuppressLint("SuspiciousIndentation")
+    private fun downloadExcel(fileName:String, anyObj:Map<String, Any>,femaleAnyObj:Map<String, Any>,category:String){
+        var isExcelGenerated= ExcelUtils.exportPantryDataIntoWorkbook(context, fileName + Constants.EXTENSION, selectedDate, anyObj,femaleAnyObj, listOfPantryColumns, listOfTimingsColumns,category)
+
+            if(isExcelGenerated){
+
+                SharedPreferencesManager.saveString(selectedDate+"_"+category,fileName)
+                Utils.showAlertDialog(requireActivity(),"Excel Download Successful")
+
+            }else{
+                val currentDateTime: java.util.Date = java.util.Date()
+
+                val currentTimestamp: Long = currentDateTime.time
+                val fileName = "$currentTimestamp"+"_"+selectedDate+"_"+category
+                downloadExcel(fileName,anyObj,femaleAnyObj,category)
+            }
+
     }
     private fun openDialog(dropFrom: String, listArr: ArrayList<String>) {
 

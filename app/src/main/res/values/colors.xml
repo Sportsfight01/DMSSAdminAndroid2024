@@ -17,4 +17,6 @@
     <color name="grey_text_font_3.1">#5C5E5E</color>
     <color name="light_grey">#C0ECEC</color>
     <color name="light_light_grey">#F2F5F5</color>
+    <color name="grey_bg">#46D3D6D6</color>
+
 </resources>

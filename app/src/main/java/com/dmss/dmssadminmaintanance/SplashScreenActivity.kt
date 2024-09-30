@@ -1,7 +1,6 @@
 package com.dmss.dmssadminmaintanance
 
 import android.content.Intent
-import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
@@ -33,7 +32,6 @@ import com.dmss.dmssadminmaintanance.ui.theme.DMSSAdminMaintananceTheme
 
 
 class SplashScreenActivity : ComponentActivity() {
-    private lateinit var fasTagPref: SharedPreferences
     var USER_roleId = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {

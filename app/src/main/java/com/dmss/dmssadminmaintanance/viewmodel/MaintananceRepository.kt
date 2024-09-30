@@ -44,7 +44,7 @@ class MaintananceRepository(private val maintainanceDao: MaintainanceDao) {
         maintainanceDao.deletedPantryData(pantryTasks)
     }
     suspend fun updatePantryTasks(pantryEntityData: PantryTasks){
-        maintainanceDao.updatePantryTasksData(pantryEntityData.task_name,pantryEntityData.created_date,pantryEntityData.isCompleted)
+        maintainanceDao.updatePantryTasksData(pantryEntityData.task_name,pantryEntityData.created_date,pantryEntityData.created_time,pantryEntityData.isCompleted,pantryEntityData.isAssigned)
     }
      fun getAllPantryTasksAssigned(date: String,time:String,isAssigned:Boolean,isCompleted:Boolean): List<PantryTasks> {
          var res1=maintainanceDao.getAllPPantryTasksAssigned(date,time,isAssigned,isCompleted)
@@ -65,6 +65,30 @@ class MaintananceRepository(private val maintainanceDao: MaintainanceDao) {
     fun getAllPantryTasks(date: String,time: String,isAssigned:Boolean): List<PantryTasks> {
         var res1=maintainanceDao.getAllPPantryTasks1(date,time,isAssigned)
         println("getAllPPantryTasks getAllPPantryTasks1 ::  "+res1)
+
+        /*   var res=maintainanceDao.getAllPPantryTasks("12-08-2024")
+           println("getAllPPantryTasks::  "+res.value)*/
+        return res1
+    }
+    fun getAllPantryNotAssignedTasks(date: String,time: String,isAssigned:Boolean): List<PantryTasks> {
+        var res1=maintainanceDao.getAllPantryTasksNotAssigned(date,time,isAssigned)
+        println("getAllPPantryTasks getAllPPantryTasks1 ::  "+" isAssigned:: "+isAssigned+"  "+res1)
+
+        /*   var res=maintainanceDao.getAllPPantryTasks("12-08-2024")
+           println("getAllPPantryTasks::  "+res.value)*/
+        return res1
+    }
+    fun getAllMaleRestRoomNotAssignedTasks(date: String,time: String,isAssigned:Boolean): List<RestRoomTasks> {
+        var res1=maintainanceDao.getAllMaleRestRoomTasksNotAssigned(date,time,isAssigned)
+        println("getAllPPantryTasks getAllPPantryTasks1 ::  "+" isAssigned:: "+isAssigned+"  "+res1)
+
+        /*   var res=maintainanceDao.getAllPPantryTasks("12-08-2024")
+           println("getAllPPantryTasks::  "+res.value)*/
+        return res1
+    }
+    fun getAllFeMaleRestRoomNotAssignedTasks(date: String,time: String,isAssigned:Boolean): List<FemaleRestRoomTasks> {
+        var res1=maintainanceDao.getAllFeMaleRestRoomTasksNotAssigned(date,time,isAssigned)
+        println("getAllPPantryTasks getAllPPantryTasks1 ::  "+" isAssigned:: "+isAssigned+"  "+res1)
 
         /*   var res=maintainanceDao.getAllPPantryTasks("12-08-2024")
            println("getAllPPantryTasks::  "+res.value)*/
@@ -101,7 +125,7 @@ class MaintananceRepository(private val maintainanceDao: MaintainanceDao) {
         maintainanceDao.deletedRestRoomTasksData(restRoomTasks)
     }
     suspend fun updateRestRoomTasksData(restRoomTasks: RestRoomTasks){
-        maintainanceDao.updateRestRoomTasksData(restRoomTasks.task_name,restRoomTasks.created_date,restRoomTasks.isCompleted)
+        maintainanceDao.updateRestRoomTasksData(restRoomTasks.task_name,restRoomTasks.created_date,restRoomTasks.created_time,restRoomTasks.isAssigned,restRoomTasks.isCompleted)
     }
     suspend fun updateRestRoomPendingTasksData(date: String,isAssigned:Boolean,isCompleted:Boolean){
         maintainanceDao.updateRestRoomPendingTasksData(date,isAssigned,isCompleted)
@@ -166,6 +190,6 @@ class MaintananceRepository(private val maintainanceDao: MaintainanceDao) {
         return res
     }
     suspend fun updateFemaleRestRoomTasksData(restRoomTasks: FemaleRestRoomTasks){
-        maintainanceDao.updateFemaleRestRoomTasksData(restRoomTasks.task_name,restRoomTasks.created_date,restRoomTasks.isCompleted)
+        maintainanceDao.updateFemaleRestRoomTasksData(restRoomTasks.task_name,restRoomTasks.created_date,restRoomTasks.created_time,restRoomTasks.isAssigned,restRoomTasks.isCompleted)
     }
 }

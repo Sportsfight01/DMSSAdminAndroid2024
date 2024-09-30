@@ -5,6 +5,7 @@ import android.os.Environment;
 import android.util.Log;
 
 
+import com.dmss.dmssadminmaintanance.R;
 import com.dmss.dmssadminmaintanance.db.FemaleRestRoomTasks;
 import com.dmss.dmssadminmaintanance.db.PantryTasks;
 import com.dmss.dmssadminmaintanance.db.RestRoomTasks;
@@ -22,12 +23,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Excel Worksheet Utility Methods
@@ -48,9 +50,12 @@ public class ExcelUtils {
     private static String created_date="Date";
     private static String pantry="Pantry";
     private static String restRoom="Rest Room";
+    private static String mCategory="";
+    private static String male="Male";
+    private static String female="Female";
 
     private static List<PantryTasks> importedExcelData;
-
+    private static Row pantry_headerRow;
     /**
      * Import data from Excel Workbook
      *
@@ -71,9 +76,10 @@ public class ExcelUtils {
      * @param dataList - Contains the actual data to be displayed in excel
      */
     public static boolean exportPantryDataIntoWorkbook(Context context, String fileName,String selectedDate,
-                                                       Map<String,List<PantryTasks>> dataList,ArrayList<String> columns,
-                                                       ArrayList<String> timings) {
+                                                       Map<String,Object> dataList, Map<String,Object> femaledataList,ArrayList<String> columns,
+                                                       ArrayList<String> timings,String category) {
         boolean isWorkbookWrittenIntoStorage;
+        mCategory =category;
 
         // Check if available and not read only
         if (!isExternalStorageAvailable() || isExternalStorageReadOnly()) {
@@ -89,15 +95,41 @@ public class ExcelUtils {
         setHeaderAssignedCellStyle();
 
         // Creating a New Sheet and Setting width for each column
-        sheet = workbook.createSheet(selectedDate);
-        sheet.setColumnWidth(0, (15 * 400));
-        sheet.setColumnWidth(1, (15 * 400));
+        if(category.equalsIgnoreCase(context.getString(R.string.rest_rooms))) {
+            sheet = workbook.createSheet("Male");
 
-        /*setPantryHeaderRow(pantry,name,created_date);
-        fillPantryDataIntoExcel(dataList);
-        isWorkbookWrittenIntoStorage = storeExcelInStorage(context, fileName);*/
-        setRestRoomHeader(columns,timings,sheet);
-        fillPantryDataIntoExcel(dataList,timings,columns);
+            sheet.setColumnWidth(0, (15 * 400));
+            sheet.setColumnWidth(1, (15 * 400));
+
+            sheet1 = workbook.createSheet("Female");
+            sheet1.setColumnWidth(0, (15 * 400));
+            sheet1.setColumnWidth(1, (15 * 400));
+
+            if(!dataList.isEmpty()) {
+                fillPantryDataIntoExcel(dataList, timings, columns, sheet, male);
+            }
+            if(!femaledataList.isEmpty()) {
+                fillPantryDataIntoExcel(femaledataList, timings, columns, sheet1, female);
+            }
+
+        }else {
+            sheet = workbook.createSheet(selectedDate);
+            sheet.setColumnWidth(0, (15 * 400));
+            sheet.setColumnWidth(1, (15 * 400));
+            fillPantryDataIntoExcel(dataList,timings,columns,sheet,pantry);
+
+        }
+
+
+
+      /*  ArrayList<String> cellRowNames= new ArrayList<>();
+        for(int i =0;i<dataList.get("10:00").size();i++){
+            if(!cellRowNames.contains(dataList.get("10:00").get(i).getTask_name())) {
+                cellRowNames.add(dataList.get("10:00").get(i).getTask_name());
+            }
+        }
+*/
+
         isWorkbookWrittenIntoStorage = storeExcelInStorage(context, fileName);
 
         return isWorkbookWrittenIntoStorage;
@@ -184,28 +216,21 @@ public class ExcelUtils {
      * Setup Header Row
      */
     private static void setRestRoomHeader(ArrayList<String> columsList,ArrayList<String> timingsList,Sheet sheet){
-      /*      Row headerRow = sheet.createRow(0);
-            Row headerRow1 = sheet.createRow(1);
-            Row headerRow2 = sheet.createRow(2);
-            Row headerRow3 = sheet.createRow(3);
-            Row headerRow4 = sheet.createRow(4);
-            Row headerRow5 = sheet.createRow(5);
-            Row headerRow6 = sheet.createRow(6);
-            Row headerRow7 = sheet.createRow(7);*/
-        Row headerRow1 = sheet.createRow(0);
-        cell = headerRow1.createCell(0);
+
+        pantry_headerRow = sheet.createRow(0);
+        cell = pantry_headerRow.createCell(0);
         cell.setCellValue("Time");
         cell.setCellStyle(headerCellStyle);
         for (int i=0;i<columsList.size();i++) {
             sheet.setColumnWidth(i+1, (10 * 400));
 //            Row headerRow = sheet.createRow(i+1);
-            cell = headerRow1.createCell(i+1);
+            cell = pantry_headerRow.createCell(i+1);
             cell.setCellValue(columsList.get(i));
             cell.setCellStyle(headerCellStyle);
         }
-        cell = headerRow1.createCell(columsList.size()+1);
-        cell.setCellValue("Assign To");
-        cell.setCellStyle(headerAssignedCellStyle);
+      /*  cell = pantry_headerRow.createCell(columsList.size()+1);
+        cell.setCellValue("Assign To");*/
+//        cell.setCellStyle(headerAssignedCellStyle);
 
 
     }
@@ -227,7 +252,7 @@ public class ExcelUtils {
             cell.setCellStyle(headerCellStyle);
 
     }
-    private static void fillPantryDataIntoExcel(List<PantryTasks> dataList) {
+   /* private static void fillPantryDataIntoExcel(List<PantryTasks> dataList) {
         for (int i = 0; i < dataList.size(); i++) {
             // Create a New Row for every new entry in list
             Row rowData = sheet.createRow(i + 1);
@@ -256,7 +281,7 @@ public class ExcelUtils {
             }
 
         }
-    }
+    }*/
     private static void fillRestRoomDataIntoExcel(Map<String,List<RestRoomTasks>> dataList,ArrayList<String> timingsList,ArrayList<String> columns,Sheet sheet) {
 
         for ( int i=0;i<timingsList.size();i++ ) {
@@ -311,7 +336,8 @@ public class ExcelUtils {
         }
 
     }
-    private static void fillPantryDataIntoExcel(Map<String,List<PantryTasks>> dataList,ArrayList<String> timingsList,ArrayList<String> columns) {
+    private static void fillPantryDataIntoExcel(Map<String,Object> dataList,ArrayList<String> timingsList,ArrayList<String> columns,Sheet sheet,String category) {
+        setRestRoomHeader(columns,timingsList,sheet);
 
         for ( int i=0;i<timingsList.size();i++ ) {
             System.out.println( timingsList.get(i) );
@@ -327,10 +353,18 @@ public class ExcelUtils {
             for ( String key : dataList.keySet() ) {
 
                 if(key.equalsIgnoreCase(timingsList.get(i))) {
-                    cell.setCellValue(dataList.get(key).get(0).getAssignedTo());
-                    cell.setCellStyle(CellsCellStyle);
-                    List<PantryTasks> listData = dataList.get(key);
-                    insertPantryTasksData(listData, rowData1);
+              /*      cell.setCellValue(dataList.get(key).get(0).getAssignedTo());
+                    cell.setCellStyle(CellsCellStyle);*/
+                    List<Object> listData = (List<Object>) dataList.get(key);
+                    if(category.equalsIgnoreCase(pantry)) {
+                        insertPantryTasksData(listData, rowData1, columns);
+                    }else if(category.equalsIgnoreCase(male)){
+                        insertMaleRestRoomTasksData(listData, rowData1, columns);
+
+                    }else if(category.equalsIgnoreCase(female)){
+                        insertFeMaleRestRoomTasksData(listData, rowData1, columns);
+
+                    }
                 }
             }
 
@@ -372,24 +406,126 @@ public class ExcelUtils {
             }
         }
     }
-    private static void insertPantryTasksData(List<PantryTasks> listData,Row rowData){
+    private static void insertPantryTasksData(List<Object> listData,Row rowData,ArrayList<String> columns){
         if (listData!=null && listData.size()>0){
             System.out.println("sevenList:: "+listData);
+            System.out.println("columns:: "+columns);
+            cell = rowData.createCell(1);
+            PantryTasks pantryTasks1=(PantryTasks) listData.get(0);
+            cell.setCellValue(pantryTasks1.getAssignedTo());
+            cell.setCellStyle(CellsCellStyle);
+            int cellNumber =2;
             for (int j = 0; j < listData.size(); j++) {
-                cell = rowData.createCell(j + 1);
-                if(listData.get(j).isCompleted()==true) {
-                    cell.setCellValue("Done");
-                }else{
-                    cell.setCellValue(" ");
+//                if(!listData.get(j).getTask_name().equalsIgnoreCase("id")) {
+                    PantryTasks pantryTasks = (PantryTasks) listData.get(j);
+                    String cellValue = "";
+                    cell.getStringCellValue();
+//                    String cellExistingValue = pantry_headerRow.getCell(j + 1).getStringCellValue();
+//                    System.out.println("pantry_headerRow:: " + cellExistingValue);
+                    int newcellNumber = cellNumber + j;
+                    System.out.println("newcellNumber:: " + newcellNumber);
+                    cell = rowData.createCell(newcellNumber);
+                    if (pantryTasks.isCompleted() == true) {
+                        System.out.println("pantry_headerRow123:: " + pantryTasks.getTask_name() + " cellNumber:: " + newcellNumber);
 
-                }
+//                    System.out.println("Cell Name:: "+listData.get(j).getTask_name()+" columns:: "+columns.get(j));
+//                    if(listData.get(j).getTask_name().equalsIgnoreCase(columns.get(j))){
+                        cellValue = "Done";
+//                    }
 
-                cell.setCellStyle(CellsCellStyle);
 
+                    } else {
+                        cellValue = "";
+//                    cell.setCellValue(cellValue);
+
+                    }
+                    cell.setCellValue(cellValue);
+                    cell.setCellStyle(CellsCellStyle);
+
+//                }
             }
         }
     }
+    private static void insertMaleRestRoomTasksData(List<Object> listData,Row rowData,ArrayList<String> columns){
+        if (listData!=null && listData.size()>0){
+            System.out.println("sevenList:: "+listData);
+            System.out.println("columns:: "+columns);
+            cell = rowData.createCell(1);
+            RestRoomTasks pantryTasks1=(RestRoomTasks) listData.get(0);
+            cell.setCellValue(pantryTasks1.getAssignedTo());
+            cell.setCellStyle(CellsCellStyle);
+            int cellNumber =2;
+            for (int j = 0; j < listData.size(); j++) {
+//                if(!listData.get(j).getTask_name().equalsIgnoreCase("id")) {
+                RestRoomTasks pantryTasks = (RestRoomTasks) listData.get(j);
+                String cellValue = "";
+                cell.getStringCellValue();
+//                    String cellExistingValue = pantry_headerRow.getCell(j + 1).getStringCellValue();
+//                    System.out.println("pantry_headerRow:: " + cellExistingValue);
+                int newcellNumber = cellNumber + j;
+                System.out.println("newcellNumber:: " + newcellNumber);
+                cell = rowData.createCell(newcellNumber);
+                if (pantryTasks.isCompleted() == true) {
+                    System.out.println("pantry_headerRow123:: " + pantryTasks.getTask_name() + " cellNumber:: " + newcellNumber);
 
+//                    System.out.println("Cell Name:: "+listData.get(j).getTask_name()+" columns:: "+columns.get(j));
+//                    if(listData.get(j).getTask_name().equalsIgnoreCase(columns.get(j))){
+                    cellValue = "Done";
+//                    }
+
+
+                } else {
+                    cellValue = "";
+//                    cell.setCellValue(cellValue);
+
+                }
+                cell.setCellValue(cellValue);
+                cell.setCellStyle(CellsCellStyle);
+
+//                }
+            }
+        }
+    }
+    private static void insertFeMaleRestRoomTasksData(List<Object> listData,Row rowData,ArrayList<String> columns){
+        if (listData!=null && listData.size()>0){
+            System.out.println("sevenList:: "+listData);
+            System.out.println("columns:: "+columns);
+            cell = rowData.createCell(1);
+            FemaleRestRoomTasks pantryTasks1=(FemaleRestRoomTasks) listData.get(0);
+            cell.setCellValue(pantryTasks1.getAssignedTo());
+            cell.setCellStyle(CellsCellStyle);
+            int cellNumber =2;
+            for (int j = 0; j < listData.size(); j++) {
+//                if(!listData.get(j).getTask_name().equalsIgnoreCase("id")) {
+                FemaleRestRoomTasks pantryTasks = (FemaleRestRoomTasks) listData.get(j);
+                String cellValue = "";
+                cell.getStringCellValue();
+//                    String cellExistingValue = pantry_headerRow.getCell(j + 1).getStringCellValue();
+//                    System.out.println("pantry_headerRow:: " + cellExistingValue);
+                int newcellNumber = cellNumber + j;
+                System.out.println("newcellNumber:: " + newcellNumber);
+                cell = rowData.createCell(newcellNumber);
+                if (pantryTasks.isCompleted() == true) {
+                    System.out.println("pantry_headerRow123:: " + pantryTasks.getTask_name() + " cellNumber:: " + newcellNumber);
+
+//                    System.out.println("Cell Name:: "+listData.get(j).getTask_name()+" columns:: "+columns.get(j));
+//                    if(listData.get(j).getTask_name().equalsIgnoreCase(columns.get(j))){
+                    cellValue = "Done";
+//                    }
+
+
+                } else {
+                    cellValue = "";
+//                    cell.setCellValue(cellValue);
+
+                }
+                cell.setCellValue(cellValue);
+                cell.setCellStyle(CellsCellStyle);
+
+//                }
+            }
+        }
+    }
     /**
      * Store Excel Workbook in external storage
      *
@@ -404,7 +540,27 @@ public class ExcelUtils {
 //        File mydir = new File(context.getExternalFilesDir("DMSS_EXCEL").getAbsolutePath());
         String root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).toString();
         File myDir = new File(root + "/DMSS");
+        try {
+            String filePath = "/storage/emulated/0/Documents/DMSS" + "/" + fileName;
 
+//            Boolean isFile = new File(filePath).isFile();
+//            if (isFile) {
+//                File fdelete = new File(filePath);
+             /*   if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    Path fileToDeletePath = Paths.get(filePath);
+                    Files.delete(fileToDeletePath);
+
+                    System.out.println("fileToDeletePath:: "+fileToDeletePath);
+
+                }*/
+
+//                Boolean isDeleted=fdelete.delete();
+//                System.out.println("isDeleted:: "+isDeleted+"  fdelete:: "+fdelete);
+
+            //}
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         if (!myDir.exists())
         {
             myDir.mkdirs();
@@ -416,6 +572,8 @@ public class ExcelUtils {
         FileOutputStream fileOutputStream = null;
 
         try {
+
+
             fileOutputStream = new FileOutputStream(file);
             workbook.write(fileOutputStream);
             Log.e(TAG, "Writing file" + file);

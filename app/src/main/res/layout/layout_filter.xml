@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/white"
+    android:layout_height="50dp"
+    android:background="@color/grey_bg"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <androidx.appcompat.widget.AppCompatButton
         android:layout_width="@dimen/_55sdp"
@@ -12,6 +12,8 @@
         android:background="@drawable/green_button_corner"
         android:textColor="@color/white"
         android:text="@string/assign"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
         android:layout_marginEnd="@dimen/_5sdp"
         android:textSize="10sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -23,6 +25,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        android:layout_centerInParent="true"
         android:layout_marginTop="@dimen/_8sdp"
         android:orientation="horizontal">
 
@@ -31,6 +34,7 @@
             android:layout_height="30dp"
             android:id="@+id/ci_calender"
             android:gravity="center"
+            android:layout_gravity="center"
             android:background="@drawable/view_task"
             android:textColor="@color/white"
             android:text="@string/submit"
@@ -51,7 +55,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:visibility="gone"
+            android:visibility="visible"
+            android:layout_gravity="center"
             android:id="@+id/ll_timer"
             android:orientation="horizontal">
 
@@ -87,6 +92,7 @@
                 android:textColor="@color/black"
                 android:gravity="center"
                 android:paddingLeft="2dp"
+                android:layout_gravity="center"
                 android:textColorHint="@color/black"
                 android:layout_marginStart="@dimen/_2sdp"
                 android:drawableRight="@drawable/down_arrow"
@@ -104,6 +110,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="5dp"
+        android:layout_centerVertical="true"
         android:layout_marginStart="@dimen/_5sdp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -113,6 +120,7 @@
             android:layout_height="wrap_content"
             android:text="All"
             android:id="@+id/tv_all"
+            android:layout_gravity="center"
             android:textColor="@color/black"
             android:textSize="16sp" />
 
@@ -126,6 +134,7 @@
             android:drawableTint="@color/blue"
             android:padding="5dp"
             android:scaleX="1"
+            android:layout_gravity="center"
             android:scaleY="1"
             android:layout_marginRight="@dimen/_7sdp"
             android:checked="false"
@@ -133,5 +142,5 @@
             android:focusable="true"
             android:textAppearance="?android:textAppearanceLarge"
             android:textColor="@color/black" />
-    </LinearLayout>v
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+</RelativeLayout>

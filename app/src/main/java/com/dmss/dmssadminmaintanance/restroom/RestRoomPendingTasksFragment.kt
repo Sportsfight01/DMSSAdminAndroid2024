@@ -85,7 +85,7 @@ class RestRoomPendingTasksFragment : BaseFragment() {
                 }
             }. show()
         }
-        binding.filterLayout.ctSelectAll.setOnClickListener(View.OnClickListener { v ->
+    /*    binding.filterLayout.ctSelectAll.setOnClickListener(View.OnClickListener { v ->
             (v as CheckedTextView).toggle()
             listArr.forEach {
                 selectedItems.add(CheckBoxModel(0, true, it.text))
@@ -95,6 +95,38 @@ class RestRoomPendingTasksFragment : BaseFragment() {
 //            listArr.clear()
             println("listArr" + listArr.size)
             checkBoxRecycleviewAdapter.loadItems(listArr)
+
+        })*/
+        binding.filterLayout.ctSelectAll.setOnClickListener(View.OnClickListener { v ->
+            selectedItems.clear()
+            var newAllSelectedItemsArr = ArrayList<CheckBoxModel>()
+
+            if(listArr.size>0) {
+                (v as CheckedTextView).toggle()
+//                listArr.clear()
+//                println("coulumnNames:: " + coulumnNames.size+"assigendList:: "+assigendList.size)
+                println("listArr" + listArr.size)
+//                }
+                listArr.forEach {
+                    var isChecked =false
+                    if (v.isChecked) {
+                        isChecked = true
+                        selectedItems.add(CheckBoxModel(0, true, it.text))
+
+                    }
+                    var chr = CheckBoxModel().apply {
+                        position = 0
+                        checked = isChecked
+                        text = it.text
+                    }
+                    newAllSelectedItemsArr.add(chr)
+                }
+                println("newAllSelectedItemsArr:: "+newAllSelectedItemsArr)
+                listArr = newAllSelectedItemsArr
+                checkBoxRecycleviewAdapter.loadItems(listArr)
+            }else{
+//                Toast.makeText(requireActivity(),"No items",Toast.LENGTH_SHORT).show()
+            }
 
         })
         binding.filterLayout.selectedDate.text = Utils.getCurrentDate()
@@ -146,11 +178,16 @@ class RestRoomPendingTasksFragment : BaseFragment() {
 
         }
         binding.filterLayout.submit.setOnClickListener {
+            if(selectedItems.size>0) {
 
             Utils.confirmationAlertAlertDialog(requireActivity(),"Are you sure! Do you want to complete task ?"){
                 if(it) {
                     updateData()
                 }
+            }
+            }else{
+                Utils.showAlertDialog(requireActivity(),getString(R.string.please_select_at_least_one_item))
+
             }
         }
     }
@@ -169,6 +206,7 @@ class RestRoomPendingTasksFragment : BaseFragment() {
             if(index==lastIndex){
                 Thread.sleep(500)
                 refreshList()
+                selectedItems.clear()
                 Toast.makeText(context,"Tasks Completed Success..", Toast.LENGTH_SHORT).show()
 
             }

@@ -29,8 +29,9 @@ class PantryTasksAdapter(val fragmentFrom:String,val callBack: (List<CheckBoxMod
        return items!!.size
     }
 
-    fun loadItems(tournaments: List<CheckBoxModel>?) {
-        items = tournaments
+    fun loadItems(itemsList: List<CheckBoxModel>?) {
+        items = itemsList
+        println("loadItems size:: "+items?.size)
         notifyDataSetChanged()
     }
 

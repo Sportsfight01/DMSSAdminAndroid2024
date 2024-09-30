@@ -1,6 +1,7 @@
 package com.dmss.dmssadminmaintanance.db
 
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.dmss.dmssadminmaintanance.model.Utils
 import com.dmss.dmssadminmaintanance.xcelsheet.Constants
@@ -34,13 +35,13 @@ data class AssignTaskToPersonEntityData(
     )
   @Entity(tableName = Constants.pantry_tasks_table)
    data class PantryTasks(
-      val task_name:String="",
-      val created_date:String="",
-      val created_time:String="",
+      var task_name:String="",
+      var created_date:String="",
+      var created_time:String="",
       var AssignedTo:String="",
-      val isAssigned:Boolean=false,
-      val isCompleted:Boolean= false,
-      @PrimaryKey(autoGenerate = true) val id: Int? = null
+      var isAssigned:Boolean=false,
+      var isCompleted:Boolean= false,
+      @PrimaryKey(autoGenerate = true) var id: Int? = null
         )
 
 @Entity(tableName = "restroom_table")
@@ -65,21 +66,21 @@ data class RestRoomEntityData(
 )
 @Entity(tableName = Constants.restroom_tasks_table)
 data class RestRoomTasks(
-    val task_name:String="",
-    val created_date:String="",
-    val created_time:String="",
+    var task_name:String="",
+    var created_date:String="",
+    var created_time:String="",
     var AssignedTo:String="",
-    val isAssigned:Boolean=false,
-    val isCompleted:Boolean= false,
-    @PrimaryKey(autoGenerate = true) val id: Int? = null
+    var isAssigned:Boolean=false,
+    var isCompleted:Boolean= false,
+     @PrimaryKey val id: Int? = null
 )
 @Entity(tableName = Constants.female_restroom_tasks_table)
 data class FemaleRestRoomTasks(
-    val task_name:String="",
-    val created_date:String="",
-    val created_time:String="",
+    var task_name:String="",
+    var created_date:String="",
+    var created_time:String="",
     var AssignedTo:String="",
-    val isAssigned:Boolean=false,
-    val isCompleted:Boolean= false,
+    var isAssigned:Boolean=false,
+    var isCompleted:Boolean= false,
     @PrimaryKey(autoGenerate = true) val id: Int? = null
 )

@@ -6,6 +6,7 @@ import android.provider.ContactsContract.Contacts
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckedTextView
 import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -88,6 +89,66 @@ class PendingTaskListFragment : BaseFragment() {
                 }
             }. show()
         }
+       /* binding.filterLayout.ctSelectAll.setOnClickListener(View.OnClickListener { v ->
+            selectedItems.clear()
+            listArr.forEach {
+                var newAllSelectedItemsArr = ArrayList<CheckBoxModel>()
+                (v as CheckedTextView).toggle()
+//                var isChecked = false
+
+                    listArr.forEach {
+                        var chr = CheckBoxModel().apply {
+                            position = 0
+                            checked = v.isChecked
+                            text = it.text
+                        }
+                        newAllSelectedItemsArr.add(chr)
+                        if(v.isChecked){
+                            selectedItems.add(CheckBoxModel(0, true, it.text))
+
+                        }
+
+                    }
+                    listArr = newAllSelectedItemsArr
+                    checkBoxRecycleviewAdapter.loadItems(listArr)
+
+//                }
+
+
+            }
+        })*/
+        binding.filterLayout.ctSelectAll.setOnClickListener(View.OnClickListener { v ->
+            selectedItems.clear()
+            var newAllSelectedItemsArr = ArrayList<CheckBoxModel>()
+
+            if(listArr.size>0) {
+                (v as CheckedTextView).toggle()
+//                listArr.clear()
+//                println("coulumnNames:: " + coulumnNames.size+"assigendList:: "+assigendList.size)
+                println("listArr" + listArr.size)
+//                }
+                listArr.forEach {
+                    var isChecked =false
+                    if (v.isChecked) {
+                        isChecked = true
+                        selectedItems.add(CheckBoxModel(0, true, it.text))
+
+                    }
+                    var chr = CheckBoxModel().apply {
+                        position = 0
+                        checked = isChecked
+                        text = it.text
+                    }
+                    newAllSelectedItemsArr.add(chr)
+                }
+                println("newAllSelectedItemsArr:: "+newAllSelectedItemsArr)
+                listArr = newAllSelectedItemsArr
+                checkBoxRecycleviewAdapter.loadItems(listArr)
+            }else{
+//                Toast.makeText(requireActivity(),"No items",Toast.LENGTH_SHORT).show()
+            }
+
+        })
         binding.filterLayout.selectedDate.text = Utils.getCurrentDate()
         viewModel = ViewModelProvider(this)[MaintainanceViewModel::class.java]
       /*  viewModel.getAllPantryTasksAssigned(binding.filterLayout.selectedDate.text.toString(),binding.filterLayout.selectTime.text.toString(),
@@ -116,11 +177,19 @@ class PendingTaskListFragment : BaseFragment() {
             checkBoxRecycleviewAdapter.loadItems(listArr)
 
             binding.filterLayout.submit.setOnClickListener {
-             Utils.confirmationAlertAlertDialog(requireActivity(),"Are you sure! Do you want to complete task ?"){it1->
-                 if(it1){
-                 updateData()
-                     }
-             }
+                if(selectedItems.size>0) {
+                    Utils.confirmationAlertAlertDialog(
+                        requireActivity(),
+                        "Are you sure! Do you want to complete task ?"
+                    ) { it1 ->
+                        if (it1) {
+                            updateData()
+                        }
+                    }
+                }else{
+                    Utils.showAlertDialog(requireActivity(),getString(R.string.please_select_at_least_one_item))
+
+                }
             }
         }
 
@@ -136,7 +205,7 @@ class PendingTaskListFragment : BaseFragment() {
             if(index==lastIndex){
                 Thread.sleep(1000)
                 println("lastIndex:: "+lastIndex+"  index:: "+index)
-
+               selectedItems.clear()
                 listArr.clear()
                 checkBoxRecycleviewAdapter.loadItems(listArr)
                 viewModel.getAllPantryTasksAssigned(binding.filterLayout.selectedDate.text.toString(),
